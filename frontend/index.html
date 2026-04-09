@@ -196,7 +196,7 @@
   </div>
 
 <script>
-  const API_BASE = 'http://127.0.0.1:8000';
+  const API_BASE = 'https://newgesture-1.onrender.com';
 
   // ─── State
   const state = {
@@ -509,9 +509,9 @@
       const data = await res.json();
       showToast('Session saved! ID: ' + data.id);
     } catch (err) {
-      showToast('Backend offline — start uvicorn first.');
+      showToast('Backend offline — check Render service.');
     }
   });
-<\/script>
+</script>
 </body>
 </html>
