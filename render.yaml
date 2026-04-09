@@ -1,0 +1,28 @@
+services:
+  # ─── Backend: FastAPI Web Service ───────────────────────────────────────────
+  - type: web
+    name: air-drawing-api
+    env: python
+    region: singapore
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+  # ─── Frontend: Static Site ───────────────────────────────────────────────────
+  - type: web
+    name: air-drawing-frontend
+    env: static
+    region: singapore
+    plan: free
+    rootDir: frontend
+    staticPublishPath: .
+    buildCommand: echo 'No build needed'
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -17,8 +18,13 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 SESSIONS_FILE = DATA_DIR / "sessions.json"
 
 
-app = FastAPI(title="Air Drawing API", version="1.0.0", description="Backend for Air Drawing Studio")
+app = FastAPI(
+    title="Air Drawing API",
+    version="1.0.0",
+    description="Backend for Air Drawing Studio — hand gesture drawing app",
+)
 
+# ─── CORS: allow all origins so frontend (Render static site) can call this ──
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,7 +34,7 @@ app.add_middleware(
 )
 
 
-# ─── Models
+# ─── Models ─────────────────────────────────────────────────────────────────
 class StrokePoint(BaseModel):
     x: float
     y: float
@@ -50,7 +56,7 @@ class SessionOut(SessionIn):
     id: str
 
 
-# ─── WebSocket connection manager
+# ─── WebSocket Manager ──────────────────────────────────────────────────────
 class ConnectionManager:
     def __init__(self) -> None:
         self.active: list[WebSocket] = []
@@ -77,7 +83,7 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
-# ─── JSON helpers
+# ─── JSON storage helpers ────────────────────────────────────────────────────
 def read_sessions() -> list[dict[str, Any]]:
     if not SESSIONS_FILE.exists():
         return []
@@ -88,13 +94,15 @@ def read_sessions() -> list[dict[str, Any]]:
 
 
 def write_sessions(items: list[dict[str, Any]]) -> None:
-    SESSIONS_FILE.write_text(json.dumps(items, indent=2, ensure_ascii=False), encoding="utf-8")
+    SESSIONS_FILE.write_text(
+        json.dumps(items, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
 
 
-# ─── Routes
+# ─── Routes ─────────────────────────────────────────────────────────────────
 @app.get("/")
 def root() -> dict[str, str]:
-    return {"message": "Air Drawing API — running 🎨"}
+    return {"message": "Air Drawing API — running 🎨", "docs": "/docs"}
 
 
 @app.get("/health")
@@ -115,8 +123,9 @@ async def create_session(session: SessionIn) -> JSONResponse:
     payload["created_at"] = payload.get("created_at") or datetime.utcnow().isoformat()
     items.append(payload)
     write_sessions(items)
-    # Broadcast to all connected WebSocket clients
-    await manager.broadcast({"type": "session_saved", "session_id": payload["id"], "name": payload["name"]})
+    await manager.broadcast(
+        {"type": "session_saved", "session_id": payload["id"], "name": payload["name"]}
+    )
     return JSONResponse(payload, status_code=201)
 
 
@@ -142,14 +151,24 @@ async def delete_session(session_id: str) -> JSONResponse:
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket) -> None:
     await manager.connect(websocket)
-    await websocket.send_json({"type": "welcome", "message": "Connected to Air Drawing WebSocket", "time": datetime.utcnow().isoformat()})
+    await websocket.send_json(
+        {
+            "type": "welcome",
+            "message": "Connected to Air Drawing WebSocket",
+            "time": datetime.utcnow().isoformat(),
+        }
+    )
     try:
         while True:
             data = await websocket.receive_json()
             event = data.get("type", "")
             if event == "ping":
-                await websocket.send_json({"type": "pong", "time": datetime.utcnow().isoformat()})
+                await websocket.send_json(
+                    {"type": "pong", "time": datetime.utcnow().isoformat()}
+                )
             elif event == "broadcast":
-                await manager.broadcast({"type": "broadcast", "payload": data.get("payload")})
+                await manager.broadcast(
+                    {"type": "broadcast", "payload": data.get("payload")}
+                )
     except WebSocketDisconnect:
         manager.disconnect(websocket)
