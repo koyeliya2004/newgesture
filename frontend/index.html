@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Air Drawing Studio</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #0a0a10;
+      --surface: #11111a;
+      --surface2: #191927;
+      --border: #2d2d42;
+      --text: #ececf6;
+      --muted: #9ea0b8;
+      --primary: #8b5cf6;
+      --draw: #a78bfa;
+      --erase: #fb7185;
+      --move: #34d399;
+      --idle: #60a5fa;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Satoshi', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; height: 100dvh; }
+
+    /* Top bar */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 58px;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+      background: rgba(10,10,16,.85); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border); z-index: 20;
+    }
+    .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.05rem; letter-spacing: -.03em; }
+    .brand-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--draw); box-shadow: 0 0 8px var(--draw); }
+    .cam-status { font-size: .75rem; color: var(--muted); padding: 4px 12px; border: 1px solid var(--border); border-radius: 999px; }
+
+    /* Canvas app container */
+    .app { position: fixed; inset: 0; }
+    video, canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+    video { opacity: 0; transition: opacity .5s; }
+    video.on { opacity: 1; }
+    video, #skeletonCanvas { transform: scaleX(-1); }
+    #drawCanvas { pointer-events: none; }
+
+    /* Side panels */
+    .panel {
+      position: fixed; z-index: 15;
+      background: rgba(17,17,26,.88); border: 1px solid var(--border);
+      backdrop-filter: blur(16px); border-radius: 16px;
+    }
+    .legend { top: 74px; left: 20px; padding: 14px 16px; font-size: .78rem; color: var(--muted); line-height: 1.95; }
+    .legend-title { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: .84rem; }
+    .legend-row { display: flex; align-items: center; gap: 8px; }
+    .lg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .modes { top: 74px; right: 20px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 170px; }
+    .mode-row { display: flex; align-items: center; gap: 8px; font-size: .8rem; }
+    .mdot { width: 10px; height: 10px; border-radius: 50%; background: var(--idle); transition: background .15s, box-shadow .15s; flex-shrink: 0; }
+
+    /* Bottom controls */
+    .controls {
+      bottom: 20px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 12px; padding: 12px 18px;
+      white-space: nowrap;
+    }
+    .colors { display: flex; gap: 7px; }
+    .sw { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform .15s, border-color .15s; }
+    .sw:hover { transform: scale(1.15); }
+    .sw.active { border-color: #fff; transform: scale(1.15); }
+    .divider { width: 1px; height: 26px; background: var(--border); }
+    .slider-group { display: flex; align-items: center; gap: 8px; font-size: .75rem; color: var(--muted); }
+    input[type=range] { -webkit-appearance: none; width: 80px; height: 4px; background: var(--border); border-radius: 2px; cursor: pointer; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--draw); }
+    .btn {
+      background: transparent; color: var(--text); border: 1px solid var(--border);
+      padding: 7px 13px; border-radius: 10px; cursor: pointer; font-family: 'Satoshi', sans-serif;
+      font-size: .8rem; font-weight: 500; transition: background .15s, border-color .15s, color .15s;
+    }
+    .btn:hover { background: var(--surface2); border-color: var(--primary); }
+    .btn.danger:hover { border-color: var(--erase); color: var(--erase); }
+    .btn.success:hover { border-color: var(--move); color: var(--move); }
+
+    /* Start overlay */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(8,8,14,.96); backdrop-filter: blur(10px);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 24px; z-index: 30; transition: opacity .5s; 
+    }
+    .overlay.hidden { opacity: 0; pointer-events: none; }
+    .big-title {
+      font-size: clamp(2.2rem,6vw,4.5rem); font-weight: 700; letter-spacing: -.04em;
+      background: linear-gradient(135deg, #a78bfa 30%, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .sub { color: var(--muted); font-size: 1rem; line-height: 1.6; text-align: center; max-width: 500px; padding: 0 20px; }
+    .start-btn {
+      background: var(--primary); color: #fff; border: none; padding: 14px 32px;
+      border-radius: 999px; font-size: 1rem; font-weight: 700; cursor: pointer;
+      font-family: 'Satoshi', sans-serif; box-shadow: 0 0 28px rgba(139,92,246,.45);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .start-btn:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(139,92,246,.6); }
+    .gesture-grid {
+      display: grid; grid-template-columns: repeat(2,1fr); gap: 10px;
+      padding: 0 20px; max-width: 480px; width: 100%;
+    }
+    .g-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 14px; font-size: .82rem; line-height: 1.5;
+    }
+    .g-card .emoji { font-size: 1.4rem; margin-bottom: 4px; }
+    .g-card b { color: var(--text); }
+    .g-card span { color: var(--muted); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 999px;
+      padding: 8px 20px; font-size: .8rem; color: var(--text); z-index: 50;
+      opacity: 0; transition: all .3s; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 700px) { .legend { display: none; } .modes { right: 12px; top: 68px; } }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="brand"><div class="brand-dot"></div> Air Drawing Studio</div>
+    <div class="cam-status" id="camStatus">Camera off</div>
+  </div>
+
+  <!-- Gesture Legend -->
+  <div class="panel legend">
+    <div class="legend-title">✋ Gestures</div>
+    <div class="legend-row"><div class="lg-dot" style="background:var(--draw)"></div> Index only → Draw</div>
+    <div class="legend-row"><div class="lg-dot" style="background:var(--erase)"></div> Open palm → Erase</div>
+    <div class="legend-row"><div class="lg-dot" style="background:var(--move)"></div> Pinch → Move stroke</div>
+    <div class="legend-row"><div class="lg-dot" style="background:var(--idle)"></div> Fist / other → Idle</div>
+  </div>
+
+  <!-- Hand Mode Indicators -->
+  <div class="panel modes">
+    <div class="mode-row"><div class="mdot" id="leftDot"></div><span id="leftText">Left: —</span></div>
+    <div class="mode-row"><div class="mdot" id="rightDot"></div><span id="rightText">Right: —</span></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="panel controls">
+    <div class="colors" id="colorRow">
+      <div class="sw active" style="background:#a78bfa" data-color="#a78bfa"></div>
+      <div class="sw" style="background:#34d399" data-color="#34d399"></div>
+      <div class="sw" style="background:#fb7185" data-color="#fb7185"></div>
+      <div class="sw" style="background:#facc15" data-color="#facc15"></div>
+      <div class="sw" style="background:#60a5fa" data-color="#60a5fa"></div>
+      <div class="sw" style="background:#f97316" data-color="#f97316"></div>
+      <div class="sw" style="background:#ffffff" data-color="#ffffff"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="slider-group">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/></svg>
+      <input type="range" id="brushSize" min="2" max="22" value="5">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+    </div>
+    <div class="divider"></div>
+    <button class="btn danger" id="clearBtn">Clear</button>
+    <button class="btn" id="undoBtn">Undo</button>
+    <button class="btn" id="saveImgBtn">Save PNG</button>
+    <button class="btn success" id="saveSessionBtn">Save Session</button>
+  </div>
+
+  <!-- Canvas App -->
+  <div class="app">
+    <video id="video" playsinline></video>
+    <canvas id="drawCanvas"></canvas>
+    <canvas id="skeletonCanvas"></canvas>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Start Overlay -->
+  <div class="overlay" id="overlay">
+    <div class="big-title">Air Drawing Studio</div>
+    <div class="sub">Draw in the air with your hands. Hand skeleton tracked live. No plugins needed — runs fully in your browser.</div>
+    <div class="gesture-grid">
+      <div class="g-card"><div class="emoji">☝️</div><b>Draw</b><br><span>Index finger only</span></div>
+      <div class="g-card"><div class="emoji">🤚</div><b>Erase</b><br><span>Open palm</span></div>
+      <div class="g-card"><div class="emoji">🤏</div><b>Move stroke</b><br><span>Pinch gesture</span></div>
+      <div class="g-card"><div class="emoji">✊</div><b>Idle</b><br><span>Fist or other</span></div>
+    </div>
+    <button class="start-btn" id="startBtn">🎥 Start Camera</button>
+  </div>
+
+<script>
+  const API_BASE = 'http://127.0.0.1:8000';
+
+  // ─── State
+  const state = {
+    color: '#a78bfa',
+    size: 5,
+    strokes: [],
+    current: null,
+    moving: null,
+    lastPinch: { Left: null, Right: null }
+  };
+
+  // ─── Canvas setup
+  const video = document.getElementById('video');
+  const dCanvas = document.getElementById('drawCanvas');
+  const sCanvas = document.getElementById('skeletonCanvas');
+  const dctx = dCanvas.getContext('2d');
+  const sctx = sCanvas.getContext('2d');
+
+  function resize() {
+    dCanvas.width = innerWidth; dCanvas.height = innerHeight;
+    sCanvas.width = innerWidth; sCanvas.height = innerHeight;
+    redraw();
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  // ─── Draw helpers
+  function lmPx(lm) {
+    return { x: (1 - lm.x) * dCanvas.width, y: lm.y * dCanvas.height };
+  }
+
+  function drawStroke(st) {
+    if (!st || st.points.length < 2) return;
+    dctx.save();
+    dctx.strokeStyle = st.color;
+    dctx.lineWidth = st.size;
+    dctx.lineCap = 'round';
+    dctx.lineJoin = 'round';
+    dctx.shadowBlur = st.size * 1.6;
+    dctx.shadowColor = st.color + 'aa';
+    dctx.beginPath();
+    dctx.moveTo(st.points[0].x, st.points[0].y);
+    for (let i = 1; i < st.points.length; i++) {
+      const p0 = st.points[i - 1], p1 = st.points[i];
+      dctx.quadraticCurveTo(p0.x, p0.y, (p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
+    }
+    dctx.stroke();
+    dctx.restore();
+  }
+
+  function redraw() {
+    dctx.clearRect(0, 0, dCanvas.width, dCanvas.height);
+    state.strokes.forEach(drawStroke);
+  }
+
+  // ─── Gesture detection
+  const TIPS = [4, 8, 12, 16, 20];
+  const PIPS = [3, 6, 10, 14, 18];
+
+  function fingerUp(lm, f) {
+    if (f === 0) return Math.abs(lm[4].x - lm[2].x) > 0.05;
+    return lm[TIPS[f]].y < lm[PIPS[f]].y;
+  }
+
+  function detectGesture(lm) {
+    const fs = [0, 1, 2, 3, 4].map(i => fingerUp(lm, i));
+    const ext = fs.filter(Boolean).length;
+    const pinch = Math.hypot(lm[4].x - lm[8].x, lm[4].y - lm[8].y);
+    if (pinch < 0.07 && !fs[2] && !fs[3] && !fs[4]) return 'PINCH';
+    if (fs[1] && !fs[2] && !fs[3] && !fs[4]) return 'DRAW';
+    if (ext >= 4) return 'ERASE';
+    return 'IDLE';
+  }
+
+  // ─── Skeleton rendering
+  const CONNS = [
+    [0,1],[1,2],[2,3],[3,4],
+    [0,5],[5,6],[6,7],[7,8],
+    [0,9],[9,10],[10,11],[11,12],
+    [0,13],[13,14],[14,15],[15,16],
+    [0,17],[17,18],[18,19],[19,20],
+    [5,9],[9,13],[13,17]
+  ];
+  const GCOL = { DRAW: '#a78bfa', ERASE: '#fb7185', PINCH: '#34d399', IDLE: '#60a5fa' };
+
+  function renderSkeleton(lm, gesture, label) {
+    const pts = lm.map(lmPx);
+    const c = GCOL[gesture] || '#60a5fa';
+    sctx.save();
+    sctx.strokeStyle = c;
+    sctx.lineWidth = 2;
+    sctx.shadowBlur = 8;
+    sctx.shadowColor = c;
+    CONNS.forEach(([a, b]) => {
+      sctx.beginPath();
+      sctx.moveTo(pts[a].x, pts[a].y);
+      sctx.lineTo(pts[b].x, pts[b].y);
+      sctx.stroke();
+    });
+    pts.forEach((p, i) => {
+      const isTip = TIPS.includes(i);
+      sctx.beginPath();
+      sctx.arc(p.x, p.y, isTip ? 6 : 3, 0, Math.PI * 2);
+      sctx.fillStyle = isTip ? c : c + '88';
+      sctx.shadowBlur = isTip ? 14 : 5;
+      sctx.fill();
+    });
+    const wrist = pts[0];
+    sctx.font = '600 12px Satoshi, sans-serif';
+    sctx.fillStyle = c;
+    sctx.fillText(label + ' · ' + gesture, wrist.x + 12, wrist.y - 12);
+    sctx.restore();
+  }
+
+  // ─── Mode UI update
+  function setMode(hand, gesture) {
+    const dot = document.getElementById(hand === 'Left' ? 'leftDot' : 'rightDot');
+    const txt = document.getElementById(hand === 'Left' ? 'leftText' : 'rightText');
+    const c = GCOL[gesture] || '#60a5fa';
+    dot.style.background = c;
+    dot.style.boxShadow = `0 0 6px ${c}`;
+    const emojis = { DRAW: '✏️', ERASE: '🧹', PINCH: '🤏', IDLE: '✋' };
+    txt.textContent = `${hand}: ${emojis[gesture] || ''} ${gesture}`;
+  }
+
+  // ─── Stroke utils
+  function findStroke(x, y, r = 35) {
+    for (let i = state.strokes.length - 1; i >= 0; i--) {
+      if (state.strokes[i].points.some(p => Math.hypot(p.x - x, p.y - y) < r)) return i;
+    }
+    return null;
+  }
+
+  function eraseNear(x, y, r = 50) {
+    state.strokes = state.strokes.filter(s => !s.points.some(p => Math.hypot(p.x - x, p.y - y) < r));
+    redraw();
+  }
+
+  // ─── MediaPipe results
+  function onResults(results) {
+    sctx.clearRect(0, 0, sCanvas.width, sCanvas.height);
+    const seen = { Left: false, Right: false };
+
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+      for (let i = 0; i < results.multiHandLandmarks.length; i++) {
+        const lm = results.multiHandLandmarks[i];
+        const hand = results.multiHandedness[i].label;
+        seen[hand] = true;
+        const g = detectGesture(lm);
+        setMode(hand, g);
+        renderSkeleton(lm, g, hand);
+
+        const idx = lmPx(lm[8]);
+        const thumb = lmPx(lm[4]);
+        const mid = { x: (idx.x + thumb.x) / 2, y: (idx.y + thumb.y) / 2 };
+
+        if (g === 'DRAW') {
+          if (!state.current) {
+            state.current = { color: state.color, size: state.size, points: [] };
+            state.strokes.push(state.current);
+          }
+          state.current.points.push({ ...idx });
+          const pts = state.current.points;
+          if (pts.length > 1) {
+            dctx.save();
+            dctx.strokeStyle = state.current.color;
+            dctx.lineWidth = state.current.size;
+            dctx.lineCap = 'round';
+            dctx.shadowBlur = state.current.size * 1.5;
+            dctx.shadowColor = state.current.color + 'aa';
+            dctx.beginPath();
+            dctx.moveTo(pts.at(-2).x, pts.at(-2).y);
+            dctx.lineTo(pts.at(-1).x, pts.at(-1).y);
+            dctx.stroke();
+            dctx.restore();
+          }
+          state.lastPinch[hand] = null;
+          state.moving = null;
+        }
+        else if (g === 'ERASE') {
+          state.current = null;
+          state.moving = null;
+          const palm = lmPx(lm[9]);
+          eraseNear(palm.x, palm.y, 55);
+        }
+        else if (g === 'PINCH') {
+          state.current = null;
+          if (!state.lastPinch[hand]) {
+            state.moving = findStroke(mid.x, mid.y);
+            state.lastPinch[hand] = { ...mid };
+          } else if (state.moving !== null) {
+            const dx = mid.x - state.lastPinch[hand].x;
+            const dy = mid.y - state.lastPinch[hand].y;
+            if (state.strokes[state.moving]) {
+              state.strokes[state.moving].points = state.strokes[state.moving].points.map(p => ({ x: p.x + dx, y: p.y + dy }));
+              redraw();
+            }
+            state.lastPinch[hand] = { ...mid };
+          }
+        }
+        else {
+          state.current = null;
+          state.lastPinch[hand] = null;
+          state.moving = null;
+        }
+      }
+    }
+
+    if (!seen.Left) setMode('Left', 'IDLE');
+    if (!seen.Right) setMode('Right', 'IDLE');
+  }
+
+  // ─── Start camera
+  async function startCamera() {
+    document.getElementById('startBtn').textContent = 'Loading…';
+    const hands = new Hands({
+      locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`
+    });
+    hands.setOptions({
+      maxNumHands: 2,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.7,
+      minTrackingConfidence: 0.6
+    });
+    hands.onResults(onResults);
+
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
+    video.srcObject = stream;
+    await video.play();
+    video.classList.add('on');
+    document.getElementById('camStatus').textContent = '🟢 Camera active';
+
+    const camera = new Camera(video, {
+      onFrame: async () => await hands.send({ image: video }),
+      width: 1280, height: 720
+    });
+    await camera.start();
+
+    document.getElementById('overlay').classList.add('hidden');
+    showToast('Camera started — show your hands!');
+  }
+
+  // ─── Toast
+  function showToast(msg, ms = 2500) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), ms);
+  }
+
+  // ─── Controls
+  document.getElementById('startBtn').addEventListener('click', startCamera);
+
+  document.getElementById('colorRow').addEventListener('click', e => {
+    const sw = e.target.closest('.sw');
+    if (!sw) return;
+    document.querySelectorAll('.sw').forEach(s => s.classList.remove('active'));
+    sw.classList.add('active');
+    state.color = sw.dataset.color;
+  });
+
+  document.getElementById('brushSize').addEventListener('input', e => {
+    state.size = parseInt(e.target.value);
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    state.strokes = [];
+    state.current = null;
+    redraw();
+    showToast('Canvas cleared');
+  });
+
+  document.getElementById('undoBtn').addEventListener('click', () => {
+    if (state.strokes.length === 0) return;
+    state.strokes.pop();
+    state.current = null;
+    redraw();
+    showToast('Undone');
+  });
+
+  document.getElementById('saveImgBtn').addEventListener('click', () => {
+    const out = document.createElement('canvas');
+    out.width = dCanvas.width; out.height = dCanvas.height;
+    const c = out.getContext('2d');
+    c.fillStyle = '#0a0a10';
+    c.fillRect(0, 0, out.width, out.height);
+    c.drawImage(dCanvas, 0, 0);
+    out.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `air-drawing-${Date.now()}.png`;
+      a.click();
+    });
+    showToast('PNG saved!');
+  });
+
+  document.getElementById('saveSessionBtn').addEventListener('click', async () => {
+    if (state.strokes.length === 0) { showToast('Nothing to save yet.'); return; }
+    try {
+      const payload = {
+        name: 'session-' + Date.now(),
+        strokes: state.strokes,
+        created_at: new Date().toISOString()
+      };
+      const res = await fetch(API_BASE + '/api/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      showToast('Session saved! ID: ' + data.id);
+    } catch (err) {
+      showToast('Backend offline — start uvicorn first.');
+    }
+  });
+<\/script>
+</body>
+</html>
