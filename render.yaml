@@ -1,5 +1,5 @@
 services:
-  # ─── Backend: FastAPI Web Service ───────────────────────────────────────────
+  # --- Backend: FastAPI Web Service ---
   - type: web
     name: air-drawing-api
     env: python
@@ -11,9 +11,9 @@ services:
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.11.9
 
-  # ─── Frontend: Static Site ───────────────────────────────────────────────────
+  # --- Frontend: Static Site ---
   - type: web
     name: air-drawing-frontend
     env: static
@@ -21,7 +21,7 @@ services:
     plan: free
     rootDir: frontend
     staticPublishPath: .
-    buildCommand: echo 'No build needed'
+    buildCommand: echo 'static'
     headers:
       - path: /*
         name: Cache-Control
