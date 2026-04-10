@@ -26,6 +26,7 @@ app = FastAPI(
 
 # ─── CORS: explicitly list allowed origins ────────────────────────────────────
 ALLOWED_ORIGINS = [
+    "https://air-drawing-frontend.onrender.com",
     "https://newgesture-2.onrender.com",
     "http://localhost",
     "http://localhost:3000",
