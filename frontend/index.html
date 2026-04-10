@@ -469,6 +469,7 @@
       box-shadow: 0 0 18px rgba(139,92,246,.35);
     }
     .room-btn-create:hover { transform: translateY(-1px); box-shadow: 0 0 28px rgba(139,92,246,.6); }
+    .room-btn-create:disabled { opacity: .5; cursor: not-allowed; transform: none; }
     .room-btn-join {
       background: rgba(52,211,153,.12);
       border: 1px solid rgba(52,211,153,.25);
@@ -794,8 +795,8 @@
           </div>
         </div>
         <div class="room-card-body">
-          <input class="room-input" id="joinCodeInput" type="text" maxlength="6"
-            placeholder="Enter 6-digit code…"
+          <input class="room-input" id="joinCodeInput" type="text" maxlength="8"
+            placeholder="Enter room code…"
             oninput="this.value=this.value.toUpperCase()"
             onkeydown="if(event.key==='Enter')joinRoom()" />
           <button class="room-btn room-btn-join" onclick="joinRoom()">
@@ -857,26 +858,32 @@
 
 <script>
 /* ── ROOM LOGIC ── */
-function generateCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  return code;
-}
 function createRoom() {
-  const code = generateCode();
-  document.getElementById('roomCodeVal').textContent = code;
-  const disp = document.getElementById('roomCodeDisplay');
-  disp.classList.add('show');
   const btn = document.getElementById('createRoomBtn');
-  btn.textContent = '✦ New Room';
-  const copyBtn = document.getElementById('copyBtn');
-  copyBtn.classList.remove('copied');
-  copyBtn.textContent = 'Copy';
-  // Navigate to app with room code as host
-  setTimeout(() => {
-    window.location.href = '/app.html?room=' + code + '&host=1';
-  }, 1200);
+  btn.textContent = '⏳ Creating…';
+  btn.disabled = true;
+  fetch('https://newgesture.onrender.com/api/rooms', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      const code = data.room_id;
+      document.getElementById('roomCodeVal').textContent = code;
+      const disp = document.getElementById('roomCodeDisplay');
+      disp.classList.add('show');
+      btn.textContent = '✦ Enter Room →';
+      btn.disabled = false;
+      const copyBtn = document.getElementById('copyBtn');
+      copyBtn.classList.remove('copied');
+      copyBtn.textContent = 'Copy';
+      navigator.clipboard.writeText(code).catch(() => {});
+      btn.onclick = () => { window.location.href = '/collab.html?room=' + code + '&host=1'; };
+      setTimeout(() => {
+        window.location.href = '/collab.html?room=' + code + '&host=1';
+      }, 1800);
+    })
+    .catch(() => {
+      btn.textContent = '✦ Create Room';
+      btn.disabled = false;
+    });
 }
 function copyCode() {
   const code = document.getElementById('roomCodeVal').textContent;
@@ -893,7 +900,7 @@ function joinRoom() {
     document.getElementById('joinCodeInput').focus();
     return;
   }
-  window.location.href = '/app.html?room=' + code;
+  window.location.href = '/collab.html?room=' + code;
 }
 </script>
 
