@@ -154,7 +154,7 @@
   <div class="footer-links"><a href="/">Home</a><a href="/app.html">Studio</a></div>
 </footer>
 <script>
-const API_BASE = 'https://air-drawing-api.onrender.com';
+const API_BASE = 'https://newgesture.onrender.com';
 let allSessions = [];
 let deleteTargetId = null;
 
@@ -222,7 +222,6 @@ function applySortAndFilter(){
   renderGrid(list);
 }
 
-// KEY FIX: use no-cors first to knock server awake without CORS error
 async function loadSessions(){
   const loading=document.getElementById('loadingWrap');
   const waking=document.getElementById('wakingWrap');
@@ -230,7 +229,6 @@ async function loadSessions(){
   loading.style.display='block';waking.classList.remove('show');
   grid.innerHTML='';document.getElementById('emptyState').classList.remove('show');
 
-  // Quick attempt first
   try{
     const res=await fetch(API_BASE+'/api/sessions',{signal:AbortSignal.timeout(8000)});
     if(res.ok){
@@ -240,7 +238,6 @@ async function loadSessions(){
     }
   }catch(_){}
 
-  // Show waking UI and retry with no-cors knock
   loading.style.display='none';waking.classList.add('show');
   showToast('⏳ Backend waking up — takes ~30-60s on free plan','',8000);
 
@@ -252,9 +249,7 @@ async function loadSessions(){
     wakeBar.style.width=pct+'%';
     wakeStatus.textContent='Waiting… '+Math.round((Date.now()-start)/1000)+'s elapsed';
     try{
-      // no-cors knock: wakes server without CORS error
       await fetch(API_BASE+'/health',{method:'GET',mode:'no-cors',signal:AbortSignal.timeout(5000)});
-      // Now try real request
       const res=await fetch(API_BASE+'/api/sessions',{signal:AbortSignal.timeout(8000)});
       if(res.ok){
         allSessions=await res.json();

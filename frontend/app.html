@@ -206,7 +206,7 @@
   <button class="start-btn" id="startBtn">🎥 Start Camera</button>
 </div>
 <script>
-const API_BASE = 'https://air-drawing-api.onrender.com';
+const API_BASE = 'https://newgesture.onrender.com';
 
 const PALETTE = ['#a78bfa','#34d399','#fb7185','#facc15','#60a5fa','#f97316','#ffffff','#06b6d4','#f472b6'];
 const state = {
@@ -470,9 +470,7 @@ async function pingBackend(){
   const start=Date.now();
   while(Date.now()-start<MAX){
     try{
-      // Step 1: no-cors knock to wake the server (won't throw CORS error)
       await fetch(API_BASE+'/health',{method:'GET',mode:'no-cors',signal:AbortSignal.timeout(5000)});
-      // Step 2: verify it's truly awake with a real CORS request
       const r=await fetch(API_BASE+'/health',{signal:AbortSignal.timeout(5000)});
       if(r.ok){
         backendOnline=true;
