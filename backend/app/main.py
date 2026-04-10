@@ -17,22 +17,22 @@ DATA_DIR = BASE_DIR / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 SESSIONS_FILE = DATA_DIR / "sessions.json"
 
-
 app = FastAPI(
     title="Air Drawing API",
     version="1.0.0",
-    description="Backend for Air Drawing Studio — hand gesture drawing app",
+    description="Backend for Air Drawing Studio",
 )
 
-# ─── CORS: explicitly list allowed origins ────────────────────────────────────────────────────
 ALLOWED_ORIGINS = [
-    "https://newgesture.vercel.app",         # Vercel production
-    "https://air-drawing-frontend.onrender.com",  # Render frontend
-    "https://newgesture-2.onrender.com",     # Render legacy
+    "https://newgesture.vercel.app",
+    "https://air-drawing-frontend.onrender.com",
+    "https://newgesture-2.onrender.com",
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:5500",
     "http://127.0.0.1:5500",
+    "http://127.0.0.1",
+    "http://127.0.0.1:8080",
 ]
 
 app.add_middleware(
@@ -44,7 +44,6 @@ app.add_middleware(
 )
 
 
-# ─── Models ───────────────────────────────────────────────────────────────────────────
 class StrokePoint(BaseModel):
     x: float
     y: float
@@ -66,7 +65,6 @@ class SessionOut(SessionIn):
     id: str
 
 
-# ─── WebSocket Manager ────────────────────────────────────────────────────────────────────
 class ConnectionManager:
     def __init__(self) -> None:
         self.active: list[WebSocket] = []
@@ -93,7 +91,6 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
-# ─── JSON storage helpers ────────────────────────────────────────────────────────────────────
 def read_sessions() -> list[dict[str, Any]]:
     if not SESSIONS_FILE.exists():
         return []
@@ -109,10 +106,9 @@ def write_sessions(items: list[dict[str, Any]]) -> None:
     )
 
 
-# ─── Routes ─────────────────────────────────────────────────────────────────────────────
 @app.get("/")
 def root() -> dict[str, str]:
-    return {"message": "Air Drawing API — running 🎨", "docs": "/docs"}
+    return {"message": "Air Drawing API running 🎨", "docs": "/docs"}
 
 
 @app.get("/health")
