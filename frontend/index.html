@@ -175,6 +175,16 @@
     .g-card b{color:var(--text)}
     .g-card span{color:var(--muted)}
 
+    /* ── backend status badge ── */
+    .backend-badge{
+      font-size:.72rem;padding:3px 11px;border-radius:999px;
+      border:1px solid var(--border);color:var(--muted);
+      transition:all .3s;
+    }
+    .backend-badge.online{border-color:#34d399;color:#34d399}
+    .backend-badge.offline{border-color:#fb7185;color:#fb7185}
+    .backend-badge.waking{border-color:#facc15;color:#facc15}
+
     /* ── toast ── */
     .toast{
       position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(16px);
@@ -199,6 +209,7 @@
     <div class="stat-item"><span class="stat-val" id="statFps">0</span><span>fps</span></div>
   </div>
   <div class="topbar-right">
+    <div class="backend-badge" id="backendBadge">⏳ Waking backend…</div>
     <div class="cam-status" id="camStatus">Camera off</div>
   </div>
 </div>
@@ -316,6 +327,31 @@
 <script>
 const API_BASE = 'https://newgesture-1.onrender.com';
 
+// ── Backend wake-up ping (Render free tier spins down after 15min) ──────────
+const badge = document.getElementById('backendBadge');
+let backendOnline = false;
+
+async function pingBackend(retries = 8, delay = 4000) {
+  badge.className = 'backend-badge waking';
+  badge.textContent = '⏳ Waking backend…';
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(API_BASE + '/health', { signal: AbortSignal.timeout(5000) });
+      if (res.ok) {
+        backendOnline = true;
+        badge.className = 'backend-badge online';
+        badge.textContent = '🟢 Backend online';
+        return;
+      }
+    } catch (_) { /* still waking */ }
+    await new Promise(r => setTimeout(r, delay));
+  }
+  backendOnline = false;
+  badge.className = 'backend-badge offline';
+  badge.textContent = '🔴 Backend offline';
+}
+pingBackend();
+
 // ── State
 const state = {
   color: '#a78bfa',
@@ -366,7 +402,6 @@ const BG_THEMES = {
   },
   chalk: ()=>{
     bgCtx.fillStyle='#2c1810'; bgCtx.fillRect(0,0,bgCv.width,bgCv.height);
-    // subtle texture
     for(let i=0;i<3000;i++){
       bgCtx.fillStyle=`rgba(255,220,180,${Math.random()*0.025})`;
       bgCtx.fillRect(Math.random()*bgCv.width,Math.random()*bgCv.height,2,2);
@@ -401,7 +436,6 @@ function drawStroke(st){
     dCtx.lineJoin = 'miter';
   }
   if(st.brush === 'spray'){
-    // spray is drawn per-segment below
     dCtx.restore();
     drawSprayStroke(st);
     return;
@@ -477,7 +511,6 @@ function updateStats(){
   document.getElementById('statStrokes').textContent = state.strokes.length;
   document.getElementById('statPoints').textContent = state.strokes.reduce((a,s)=>a+s.points.length,0);
   document.getElementById('statHands').textContent  = state.handsVisible;
-  // fps
   state.frameCount++;
   const now = performance.now();
   if(now - state.lastFpsTime >= 1000){
@@ -688,7 +721,6 @@ document.getElementById('applyColor').addEventListener('click',()=>{
   let hex=document.getElementById('hexInput').value.trim();
   if(!/^#[0-9a-fA-F]{6}$/.test(hex)) hex=document.getElementById('nativeColorPicker').value;
   state.color=hex;
-  // update swatches: deselect all
   document.querySelectorAll('.sw').forEach(s=>s.classList.remove('active'));
   colorPopup.classList.remove('open');
   showToast('Color set to '+hex);
@@ -722,7 +754,6 @@ document.querySelectorAll('.bg-btn').forEach(btn=>{
     btn.classList.add('active');
     state.bg=btn.dataset.bg;
     drawBg();
-    // adjust text colors for light mode
     const isLight=state.bg==='light';
     document.documentElement.style.setProperty('--text',isLight?'#1a1a2e':'#ececf6');
     document.documentElement.style.setProperty('--muted',isLight?'#555577':'#9ea0b8');
@@ -762,6 +793,7 @@ document.getElementById('saveImgBtn').addEventListener('click',()=>{
 // ── Save Session
 document.getElementById('saveSessionBtn').addEventListener('click',async()=>{
   if(!state.strokes.length){showToast('Nothing to save yet.');return;}
+  if(!backendOnline){showToast('Backend still waking up, please wait…');return;}
   try{
     const res=await fetch(API_BASE+'/api/sessions',{
       method:'POST',
@@ -771,7 +803,8 @@ document.getElementById('saveSessionBtn').addEventListener('click',async()=>{
     const data=await res.json();
     showToast('Session saved! ID: '+data.id);
   } catch(err){
-    showToast('Backend offline — check Render service.');
+    showToast('Save failed — retrying backend…');
+    pingBackend(3, 2000);
   }
 });
 </script>

@@ -24,11 +24,19 @@ app = FastAPI(
     description="Backend for Air Drawing Studio — hand gesture drawing app",
 )
 
-# ─── CORS: allow all origins so frontend (Render static site) can call this ──
+# ─── CORS: explicitly list allowed origins ────────────────────────────────────
+ALLOWED_ORIGINS = [
+    "https://newgesture-2.onrender.com",
+    "http://localhost",
+    "http://localhost:3000",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
