@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Air Drawing Studio — Draw with Your Hands</title>
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
-  <!-- Import Three.js for 3D skeletal hand background -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     :root {
@@ -37,13 +36,31 @@
       pointer-events: none; z-index: 0;
     }
 
-    /* ── 3D SKELETAL HAND CANVAS — HERO ONLY ── */
+    /* ── FULL PAGE 3D SKELETAL HAND BACKGROUND ── */
     #skeletal-bg {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       z-index: 0;
       pointer-events: none;
+      /* Positioned on the RIGHT half for laptop view so hero text on left is readable */
+    }
+    #skeletal-bg canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* ── OLD FLOATING PARTICLES (subtle) ── */
+    #particles {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.5;
     }
 
     /* ── NAV ── */
@@ -52,7 +69,7 @@
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 clamp(20px, 5vw, 80px);
       height: 64px;
-      background: rgba(5,5,15,.8);
+      background: rgba(5,5,15,.85);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
     }
@@ -89,36 +106,53 @@
     /* ── HERO ── */
     .hero {
       min-height: 100vh;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; padding: 120px clamp(20px,5vw,80px) 80px;
-      position: relative; overflow: hidden;
-      background: radial-gradient(circle at center, #0a1118 0%, #000000 100%);
+      display: grid;
+      /* Laptop layout: text on left (55%), hand visible on right (45%) */
+      grid-template-columns: 55% 45%;
+      align-items: center;
+      padding: 100px clamp(20px, 5vw, 80px) 80px;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(
+        ellipse at 20% 50%,
+        rgba(10, 17, 24, 0.97) 0%,
+        rgba(5, 5, 15, 0.85) 50%,
+        transparent 100%
+      );
     }
+
     /* Glow orbs */
-    .hero::after {
-      content: '';
-      position: absolute;
-      width: 800px; height: 800px;
-      background: radial-gradient(circle, rgba(139,92,246,.18) 0%, transparent 70%);
-      top: 50%; left: 50%; transform: translate(-50%,-50%);
-      pointer-events: none;
-      z-index: 1;
-    }
     .orb {
       position: absolute; border-radius: 50%; pointer-events: none; filter: blur(80px);
       animation: orbFloat 8s ease-in-out infinite;
-      z-index: 1;
+      z-index: 2;
     }
-    .orb1 { width:500px;height:500px; background:rgba(139,92,246,.12); top:-100px;left:-100px; animation-delay:0s; }
-    .orb2 { width:400px;height:400px; background:rgba(52,211,153,.1); bottom:-80px;right:-80px; animation-delay:-3s; }
-    .orb3 { width:300px;height:300px; background:rgba(244,114,182,.08); top:30%;right:10%; animation-delay:-5s; }
+    .orb1 { width:500px;height:500px; background:rgba(139,92,246,.10); top:-100px;left:-100px; animation-delay:0s; }
+    .orb2 { width:400px;height:400px; background:rgba(52,211,153,.07); bottom:-80px;right:-80px; animation-delay:-3s; }
+    .orb3 { width:300px;height:300px; background:rgba(244,114,182,.06); top:30%;right:10%; animation-delay:-5s; }
     @keyframes orbFloat {
       0%,100% { transform: translateY(0) scale(1); }
       50% { transform: translateY(-30px) scale(1.05); }
     }
 
-    /* All hero content sits above the 3D canvas */
-    .hero > *:not(#skeletal-bg) { position: relative; z-index: 2; }
+    /* Hero left content column */
+    .hero-content {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      padding-right: 40px;
+    }
+
+    /* Hero right — empty column, hand shows through from fixed bg */
+    .hero-visual-col {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      min-height: 400px;
+    }
 
     .hero-badge {
       display: inline-flex; align-items: center; gap: 8px;
@@ -129,7 +163,7 @@
     }
     .hero-badge-dot { width:6px;height:6px;border-radius:50%;background:#a78bfa;animation:pulse 1.5s infinite; }
     .hero-title {
-      font-size: clamp(2.8rem, 8vw, 6.5rem);
+      font-size: clamp(2.6rem, 5.5vw, 5.5rem);
       font-weight: 900; line-height: 1.05; letter-spacing: -.04em;
       margin-bottom: 24px;
       animation: fadeUp .7s .1s ease both;
@@ -146,14 +180,15 @@
       50% { background-position: 100% 50%; }
     }
     .hero-sub {
-      font-size: clamp(1rem, 2.5vw, 1.25rem);
-      color: var(--muted); max-width: 580px; line-height: 1.7;
-      margin-bottom: 44px;
+      font-size: clamp(.95rem, 1.6vw, 1.15rem);
+      color: var(--muted); max-width: 500px; line-height: 1.75;
+      margin-bottom: 40px;
       animation: fadeUp .7s .2s ease both;
     }
     .hero-btns {
-      display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+      display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
       animation: fadeUp .7s .3s ease both;
+      margin-bottom: 48px;
     }
     .btn-primary {
       background: linear-gradient(135deg, var(--primary), var(--primary2));
@@ -171,22 +206,21 @@
     }
     .btn-secondary:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.2); transform: translateY(-2px); }
 
-    /* floating gesture cards */
+    /* floating gesture pills */
     .hero-cards {
-      display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
-      margin-top: 64px;
+      display: flex; gap: 10px; flex-wrap: wrap;
       animation: fadeUp .7s .4s ease both;
     }
     .g-pill {
       background: rgba(14,14,28,.9); border: 1px solid var(--border);
-      border-radius: 999px; padding: 10px 20px;
-      display: flex; align-items: center; gap: 8px;
-      font-size: .85rem; color: var(--muted);
+      border-radius: 999px; padding: 8px 16px;
+      display: flex; align-items: center; gap: 7px;
+      font-size: .82rem; color: var(--muted);
       backdrop-filter: blur(12px);
       transition: all .3s;
     }
     .g-pill:hover { border-color: var(--primary); color: var(--text); transform: translateY(-3px); }
-    .g-pill span { font-size: 1.2rem; }
+    .g-pill span { font-size: 1.1rem; }
 
     @keyframes fadeUp {
       from { opacity:0; transform:translateY(24px); }
@@ -195,11 +229,13 @@
 
     /* ── STATS ── */
     .stats-bar {
-      background: var(--surface);
+      position: relative; z-index: 5;
+      background: rgba(14,14,28,.9);
       border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
       padding: 40px clamp(20px,5vw,80px);
       display: flex; justify-content: center; gap: clamp(40px,8vw,120px);
       flex-wrap: wrap;
+      backdrop-filter: blur(12px);
     }
     .stat { text-align: center; }
     .stat-num {
@@ -209,7 +245,13 @@
     }
     .stat-label { color: var(--muted); font-size: .85rem; margin-top: 4px; }
 
-    /* ── SECTION ── */
+    /* ── SECTIONS (below hero — on normal page flow) ── */
+    .page-body {
+      position: relative;
+      z-index: 5;
+      background: var(--bg);
+    }
+
     section { padding: 100px clamp(20px,5vw,80px); max-width: 1200px; margin: 0 auto; }
     .section-tag {
       display: inline-block;
@@ -282,7 +324,7 @@
     .gesture-demo .gd-text span { font-size: .82rem; color: var(--muted); }
     .gd-badge {
       margin-left: auto; font-size: .72rem; font-weight: 700;
-      padding: 3px 10px; border-radius: 999px;
+      padding: 3px 10px; border-radius: 999px; white-space: nowrap;
     }
     .badge-purple { background: rgba(139,92,246,.2); color: #a78bfa; }
     .badge-green  { background: rgba(52,211,153,.15); color: #34d399; }
@@ -303,7 +345,7 @@
       transition: all .2s;
     }
     .tech-pill:hover { border-color: var(--primary); color: #a78bfa; transform: translateY(-2px); }
-    .tech-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .tech-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
     /* ── CTA SECTION ── */
     .cta-section {
@@ -318,7 +360,7 @@
       pointer-events: none;
     }
     .cta-section .section-title { font-size: clamp(2rem,5vw,4rem); }
-    .cta-section .section-sub { margin: 0 auto 44px; }
+    .cta-btns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
 
     /* ── FOOTER ── */
     footer {
@@ -337,18 +379,41 @@
     .reveal { opacity: 0; transform: translateY(32px); transition: opacity .7s ease, transform .7s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
 
-    /* ── OLD FLOATING PARTICLES (non-hero pages) ── */
-    #particles { position:fixed;inset:0;pointer-events:none;z-index:0; }
-
-    @media(max-width:600px){
-      .nav-links .nav-link { display:none; }
+    /* ── RESPONSIVE ── */
+    /* Tablet */
+    @media(max-width: 1024px) {
+      .hero {
+        grid-template-columns: 65% 35%;
+      }
+    }
+    /* Mobile */
+    @media(max-width: 768px) {
+      .hero {
+        grid-template-columns: 1fr;
+        padding-top: 90px;
+      }
+      .hero-content {
+        align-items: center;
+        text-align: center;
+        padding-right: 0;
+      }
+      .hero-sub { max-width: 100%; }
+      .hero-btns { justify-content: center; }
+      .hero-visual-col { display: none; }
+      .nav-links .nav-link { display: none; }
       .stats-bar { gap: 32px; }
+    }
+    @media(max-width: 600px) {
+      .stats-bar { gap: 24px; }
     }
   </style>
 </head>
 <body>
 
-<!-- Old 2D particle canvas kept for non-hero sections (very subtle) -->
+<!-- 3D Skeletal Hand — FIXED FULL PAGE BACKGROUND -->
+<div id="skeletal-bg"></div>
+
+<!-- Old 2D particle canvas (subtle, on top) -->
 <canvas id="particles"></canvas>
 
 <!-- NAV -->
@@ -366,42 +431,45 @@
   </div>
 </nav>
 
-<!-- HERO with 3D Skeletal Hand Background -->
+<!-- HERO — Two column on laptop: text left, hand shows right -->
 <section class="hero">
-  <!-- 3D Three.js canvas lives INSIDE the hero only -->
-  <div id="skeletal-bg"></div>
-
   <div class="orb orb1"></div>
   <div class="orb orb2"></div>
   <div class="orb orb3"></div>
 
-  <div class="hero-badge">
-    <div class="hero-badge-dot"></div>
-    Powered by MediaPipe AI · Real-time Hand Tracking
+  <!-- Left: all hero text/cta content -->
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      Powered by MediaPipe AI · Real-time Hand Tracking
+    </div>
+
+    <h1 class="hero-title">
+      Draw in the Air<br>
+      <span class="grad">With Your Hands</span>
+    </h1>
+
+    <p class="hero-sub">
+      Air Drawing Studio uses your webcam and AI-powered hand tracking to turn your finger gestures into beautiful art — no mouse, no touch, just motion.
+    </p>
+
+    <div class="hero-btns">
+      <a href="/app.html" class="btn-primary">🎨 Launch Studio</a>
+      <a href="/history.html" class="btn-secondary">📂 View History</a>
+    </div>
+
+    <div class="hero-cards">
+      <div class="g-pill"><span>☝️</span> Index to Draw</div>
+      <div class="g-pill"><span>🤚</span> Palm to Erase</div>
+      <div class="g-pill"><span>🤏</span> Pinch to Move</div>
+      <div class="g-pill"><span>✌️</span> Peace to Color</div>
+      <div class="g-pill"><span>🤙</span> Call me to Undo</div>
+      <div class="g-pill"><span>✊</span> Fist to Pause</div>
+    </div>
   </div>
 
-  <h1 class="hero-title">
-    Draw in the Air<br>
-    <span class="grad">With Your Hands</span>
-  </h1>
-
-  <p class="hero-sub">
-    Air Drawing Studio uses your webcam and AI-powered hand tracking to turn your finger gestures into beautiful art — no mouse, no touch, just motion.
-  </p>
-
-  <div class="hero-btns">
-    <a href="/app.html" class="btn-primary">🎨 Launch Studio</a>
-    <a href="/history.html" class="btn-secondary">📂 View History</a>
-  </div>
-
-  <div class="hero-cards">
-    <div class="g-pill"><span>☝️</span> Index finger to Draw</div>
-    <div class="g-pill"><span>🤚</span> Open palm to Erase</div>
-    <div class="g-pill"><span>🤏</span> Pinch to Move</div>
-    <div class="g-pill"><span>✌️</span> Peace to Change Color</div>
-    <div class="g-pill"><span>🤙</span> Call me to Undo</div>
-    <div class="g-pill"><span>✊</span> Fist to Pause</div>
-  </div>
+  <!-- Right: visual column — the 3D hand from fixed bg shows through here -->
+  <div class="hero-visual-col"></div>
 </section>
 
 <!-- STATS -->
@@ -411,6 +479,9 @@
   <div class="stat"><div class="stat-num">4</div><div class="stat-label">Brush Styles</div></div>
   <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Creative Possibilities</div></div>
 </div>
+
+<!-- ═══ PAGE BODY — sits on top of bg after hero ═══ -->
+<div class="page-body">
 
 <!-- FEATURES -->
 <section id="features">
@@ -528,8 +599,8 @@
   <div class="reveal">
     <div class="section-tag">Get Started</div>
     <h2 class="section-title">Ready to draw<br><span class="grad" style="font-size:inherit">with your hands?</span></h2>
-    <p class="section-sub" style="margin:0 auto 44px">No download. No install. Just open your browser, allow camera access, and start creating.</p>
-    <div class="hero-btns" style="justify-content:center">
+    <p class="section-sub" style="margin: 0 auto 44px; max-width: 520px;">No download. No install. Just open your browser, allow camera access, and start creating.</p>
+    <div class="cta-btns">
       <a href="/app.html" class="btn-primary">🎨 Launch Studio Free</a>
       <a href="/history.html" class="btn-secondary">📂 My Saved Art</a>
     </div>
@@ -548,27 +619,33 @@
   <div class="footer-copy">Built with ❤️ by Koyeliya Ghosh</div>
 </footer>
 
+</div><!-- end .page-body -->
+
 <script>
 // ═══════════════════════════════════════════════════════
-// 3D SKELETAL HAND PARTICLE BACKGROUND — HERO ONLY
+// 3D SKELETAL HAND — FIXED FULL-PAGE BACKGROUND
+// Hand is positioned toward the RIGHT side of the screen
+// so it's visible on laptop view alongside the hero text
 // ═══════════════════════════════════════════════════════
 (function() {
   const container = document.getElementById('skeletal-bg');
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x050a10, 0.03);
+  scene.fog = new THREE.FogExp2(0x050a10, 0.025);
 
-  const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
-  camera.position.z = 13;
-  camera.position.y = 2;
+  const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.z = 14;
+  camera.position.y = 1;
+  // Offset camera to center the hand on the RIGHT half of the screen
+  camera.position.x = -4;
 
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   container.appendChild(renderer.domElement);
 
-  // --- BACKGROUND SMALL WAVE PARTICLES ---
-  const bgParticleCount = 5000;
+  // --- BACKGROUND WAVE PARTICLES ---
+  const bgParticleCount = 4000;
   const bgGeometry = new THREE.BufferGeometry();
   const bgPositions = new Float32Array(bgParticleCount * 3);
   const bgInitialY = new Float32Array(bgParticleCount);
@@ -579,7 +656,6 @@
     bgPositions[i * 3 + 2] = (Math.random() - 0.5) * 50 - 40;
     bgInitialY[i] = bgPositions[i * 3 + 1];
   }
-
   bgGeometry.setAttribute('position', new THREE.BufferAttribute(bgPositions, 3));
   bgGeometry.setAttribute('initialY', new THREE.BufferAttribute(bgInitialY, 1));
 
@@ -605,9 +681,8 @@
       uniform vec3 color;
       void main() {
         vec2 coord = gl_PointCoord - vec2(0.5);
-        float dist = length(coord);
-        if (dist > 0.5) discard;
-        float alpha = smoothstep(0.5, 0.1, dist) * 0.6;
+        if (length(coord) > 0.5) discard;
+        float alpha = smoothstep(0.5, 0.1, length(coord)) * 0.5;
         gl_FragColor = vec4(color, alpha);
       }
     `,
@@ -615,11 +690,9 @@
     depthWrite: false,
     blending: THREE.AdditiveBlending
   });
+  scene.add(new THREE.Points(bgGeometry, bgMaterial));
 
-  const bgParticleMesh = new THREE.Points(bgGeometry, bgMaterial);
-  scene.add(bgParticleMesh);
-
-  // --- BONE NODE CLASS ---
+  // --- BONE NODE ---
   class BoneNode {
     constructor(localPos) {
       this.localPos = localPos;
@@ -632,13 +705,11 @@
       const localMat = new THREE.Matrix4().makeTranslation(this.localPos.x, this.localPos.y, this.localPos.z);
       const rotMat = new THREE.Matrix4().makeRotationFromEuler(this.rotation);
       localMat.multiply(rotMat);
-      if (parentMatrix) {
-        this.worldMatrix.multiplyMatrices(parentMatrix, localMat);
-      } else {
-        this.worldMatrix.copy(localMat);
-      }
+      this.worldMatrix = parentMatrix
+        ? new THREE.Matrix4().multiplyMatrices(parentMatrix, localMat)
+        : localMat.clone();
       this.worldPos.setFromMatrixPosition(this.worldMatrix);
-      for (let child of this.children) child.update(this.worldMatrix);
+      this.children.forEach(c => c.update(this.worldMatrix));
     }
   }
 
@@ -646,8 +717,7 @@
     let base = new BoneNode(baseOffset);
     base.rotation.copy(baseRot);
     parent.children.push(base);
-    let nodes = [base];
-    let current = base;
+    let nodes = [base], current = base;
     for (let len of lengths) {
       let next = new BoneNode(new THREE.Vector3(0, len, 0));
       current.children.push(next);
@@ -657,23 +727,20 @@
     return nodes;
   }
 
-  // --- BUILD HAND ---
-  const wrist = new BoneNode(new THREE.Vector3(0, -5, 0));
-  const thumb  = createFinger(wrist, new THREE.Vector3(-2.0, 1.0, 1.5), [1.8, 1.2], new THREE.Euler(0.5, -0.6, 0.8));
-  const index  = createFinger(wrist, new THREE.Vector3(-1.5, 3.5, 0),  [2.2, 1.5, 1.0], new THREE.Euler(0, 0,  0.15));
-  const middle = createFinger(wrist, new THREE.Vector3(0,   4.0, 0),   [2.6, 1.8, 1.2], new THREE.Euler(0, 0,  0));
-  const ring   = createFinger(wrist, new THREE.Vector3(1.5, 3.8, 0),   [2.4, 1.6, 1.1], new THREE.Euler(0, 0, -0.15));
-  const pinky  = createFinger(wrist, new THREE.Vector3(2.8, 2.8, 0),   [1.8, 1.3, 0.9], new THREE.Euler(0, 0, -0.3));
+  const wrist  = new BoneNode(new THREE.Vector3(0, -5, 0));
+  const thumb  = createFinger(wrist, new THREE.Vector3(-2.0, 1.0, 1.5), [1.8, 1.2], new THREE.Euler(0.5,-0.6,0.8));
+  const index  = createFinger(wrist, new THREE.Vector3(-1.5, 3.5, 0),  [2.2,1.5,1.0], new THREE.Euler(0,0,0.15));
+  const middle = createFinger(wrist, new THREE.Vector3(0,   4.0, 0),   [2.6,1.8,1.2], new THREE.Euler(0,0,0));
+  const ring   = createFinger(wrist, new THREE.Vector3(1.5, 3.8, 0),   [2.4,1.6,1.1], new THREE.Euler(0,0,-0.15));
+  const pinky  = createFinger(wrist, new THREE.Vector3(2.8, 2.8, 0),   [1.8,1.3,0.9], new THREE.Euler(0,0,-0.3));
   wrist.update(null);
 
   // --- GENERATE PARTICLES ---
   const particleData = [];
-
   function generateParticles(node, parentNode) {
-    const numJointParticles = 350;
-    for (let i = 0; i < numJointParticles; i++) {
+    for (let i = 0; i < 350; i++) {
       let theta = Math.random() * Math.PI * 2;
-      let phi   = Math.acos((Math.random() * 2) - 1);
+      let phi   = Math.acos(Math.random() * 2 - 1);
       let r     = Math.random() * 0.4;
       particleData.push({
         node,
@@ -685,27 +752,23 @@
         color: new THREE.Color().setHSL(0.8 + Math.random() * 0.15, 1.0, 0.6)
       });
     }
-
     if (parentNode) {
-      let boneLength  = node.localPos.length();
-      let isPalm      = (parentNode === wrist);
-      let density     = isPalm ? 700 : 400;
-      let numBone     = Math.floor(boneLength * density);
-      let boneThick   = isPalm ? 0.6 : 0.25;
-
+      let boneLength = node.localPos.length();
+      let isPalm     = (parentNode === wrist);
+      let density    = isPalm ? 700 : 400;
+      let boneThick  = isPalm ? 0.6 : 0.25;
+      let numBone    = Math.floor(boneLength * density);
       for (let i = 0; i < numBone; i++) {
-        let t     = Math.random();
-        let r     = Math.random() * boneThick;
+        let t = Math.random();
+        let r = Math.random() * boneThick;
         let theta = Math.random() * Math.PI * 2;
-        let lx    = r * Math.cos(theta);
-        let lz    = r * Math.sin(theta);
         particleData.push({
           node: parentNode,
-          localOffset: new THREE.Vector3(lx, 0, lz).add(node.localPos.clone().multiplyScalar(t)),
+          localOffset: new THREE.Vector3(r * Math.cos(theta), 0, r * Math.sin(theta)).add(node.localPos.clone().multiplyScalar(t)),
           color: new THREE.Color().setHSL(0.5 + Math.random() * 0.1, 1.0, 0.5)
         });
         if (Math.random() > 0.7) {
-          let ir  = Math.random() * boneThick * 0.15;
+          let ir = Math.random() * boneThick * 0.15;
           particleData.push({
             node: parentNode,
             localOffset: new THREE.Vector3(ir * Math.cos(theta), 0, ir * Math.sin(theta)).add(node.localPos.clone().multiplyScalar(t)),
@@ -714,10 +777,8 @@
         }
       }
     }
-
-    for (let child of node.children) generateParticles(child, node);
+    node.children.forEach(c => generateParticles(c, node));
   }
-
   generateParticles(wrist, null);
 
   // --- BUFFER GEOMETRY ---
@@ -725,13 +786,11 @@
   const geometry = new THREE.BufferGeometry();
   const positions = new Float32Array(particleCount * 3);
   const colors    = new Float32Array(particleCount * 3);
-
-  for (let i = 0; i < particleCount; i++) {
-    colors[i*3]   = particleData[i].color.r;
-    colors[i*3+1] = particleData[i].color.g;
-    colors[i*3+2] = particleData[i].color.b;
-  }
-
+  particleData.forEach((p, i) => {
+    colors[i*3]   = p.color.r;
+    colors[i*3+1] = p.color.g;
+    colors[i*3+2] = p.color.b;
+  });
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   geometry.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
 
@@ -745,8 +804,7 @@
         vColor = color;
         vec3 pos = position;
         float pulse = sin(time * 5.0 + position.y * 10.0 + position.z * 10.0) * 0.03;
-        pos.x += pulse;
-        pos.y += pulse;
+        pos.x += pulse; pos.y += pulse;
         vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
         float sizeBase = 22.0 + sin(time * 3.0 + position.x * 5.0) * 8.0;
         gl_PointSize = (sizeBase / -mvPosition.z);
@@ -757,9 +815,8 @@
       varying vec3 vColor;
       void main() {
         vec2 coord = gl_PointCoord - vec2(0.5);
-        float dist = length(coord);
-        if (dist > 0.5) discard;
-        float alpha = smoothstep(0.5, 0.1, dist);
+        if (length(coord) > 0.5) discard;
+        float alpha = smoothstep(0.5, 0.1, length(coord));
         gl_FragColor = vec4(vColor, alpha * 0.9 + 0.1);
       }
     `,
@@ -768,30 +825,28 @@
     transparent: true
   });
 
-  const particleMesh = new THREE.Points(geometry, shaderMaterial);
   const sceneGroup = new THREE.Group();
-  sceneGroup.add(particleMesh);
+  // Shift the hand to the right side of screen for laptop view
+  sceneGroup.position.x = 5;
+  sceneGroup.add(new THREE.Points(geometry, shaderMaterial));
   scene.add(sceneGroup);
 
-  // --- INTERACTION ---
-  let mouseX = 0, mouseY = 0;
+  // --- MOUSE INTERACTION ---
   let targetRotX = 0, targetRotY = 0;
-  let targetPosX = 0, targetPosY = 0, targetPosZ = 0;
+  let targetPosX = 5, targetPosY = 0, targetPosZ = 0;
 
   function updateTarget(clientX, clientY) {
-    mouseX = (clientX / window.innerWidth) * 2 - 1;
-    mouseY = -(clientY / window.innerHeight) * 2 + 1;
-    targetRotY = mouseX * 1.2;
-    targetRotX = mouseY * 0.8;
-    targetPosX = mouseX * 1.5;
-    targetPosY = mouseY * 1.5;
-    let dist = Math.sqrt(mouseX*mouseX + mouseY*mouseY);
-    targetPosZ = dist * 5.0;
+    const mx = (clientX / window.innerWidth) * 2 - 1;
+    const my = -(clientY / window.innerHeight) * 2 + 1;
+    // Only react to mouse when on right half
+    targetRotY = mx * 0.8;
+    targetRotX = my * 0.5;
+    targetPosX = 5 + mx * 1.0;
+    targetPosY = my * 0.8;
+    targetPosZ = Math.sqrt(mx*mx + my*my) * 2.0;
   }
-
   document.addEventListener('mousemove', e => updateTarget(e.clientX, e.clientY));
-  document.addEventListener('touchstart', e => { if(e.touches.length>0) updateTarget(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
-  document.addEventListener('touchmove',  e => { if(e.touches.length>0) updateTarget(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+  document.addEventListener('touchmove', e => { if(e.touches[0]) updateTarget(e.touches[0].clientX, e.touches[0].clientY); }, {passive:true});
 
   const clock = new THREE.Clock();
   const tempVec = new THREE.Vector3();
@@ -799,21 +854,18 @@
   function animate() {
     requestAnimationFrame(animate);
     const time = clock.getElapsedTime();
-
     shaderMaterial.uniforms.time.value = time;
     bgMaterial.uniforms.time.value     = time;
 
-    // Finger animation
-    wrist.localPos.y  = -5 + Math.sin(time * 0.8) * 0.8;
-    wrist.rotation.z  = Math.sin(time * 0.5) * 0.1;
-
-    const fingersPhase = [
+    // Animate fingers
+    wrist.localPos.y = -5 + Math.sin(time * 0.8) * 0.8;
+    wrist.rotation.z = Math.sin(time * 0.5) * 0.1;
+    [
       { chain: index,  phase: 0.0, speed: 1.2 },
       { chain: middle, phase: 0.8, speed: 1.5 },
       { chain: ring,   phase: 1.6, speed: 1.3 },
       { chain: pinky,  phase: 2.4, speed: 1.6 }
-    ];
-    fingersPhase.forEach(f => {
+    ].forEach(f => {
       let curl   = (Math.sin(time * f.speed + f.phase) * 0.5 + 0.5) * 0.8 + 0.05;
       let spread = Math.sin(time * f.speed * 0.5 + f.phase) * 0.15;
       f.chain[0].rotation.x = curl * 0.3;
@@ -826,7 +878,6 @@
     thumb[0].rotation.z = Math.cos(time * 1.3) * 0.2;
     thumb[1].rotation.x = thumbCurl;
     thumb[2].rotation.x = thumbCurl * 1.2;
-
     wrist.update(null);
 
     // Update particle positions
@@ -834,61 +885,52 @@
     let idx = 0;
     for (let i = 0; i < particleCount; i++) {
       let p = particleData[i];
-      tempVec.copy(p.localOffset);
-      tempVec.applyMatrix4(p.node.worldMatrix);
+      tempVec.copy(p.localOffset).applyMatrix4(p.node.worldMatrix);
       posAttr[idx++] = tempVec.x;
       posAttr[idx++] = tempVec.y;
       posAttr[idx++] = tempVec.z;
     }
     geometry.attributes.position.needsUpdate = true;
 
-    // Mouse parallax
-    sceneGroup.rotation.y += (targetRotY - sceneGroup.rotation.y) * 0.05;
-    sceneGroup.rotation.x += (targetRotX - sceneGroup.rotation.x) * 0.05;
-    sceneGroup.rotation.z += (Math.sin(time * 0.2) * 0.1 - sceneGroup.rotation.z) * 0.05;
-    sceneGroup.position.x += (targetPosX - sceneGroup.position.x) * 0.05;
-    sceneGroup.position.y += (targetPosY - sceneGroup.position.y) * 0.05;
-    sceneGroup.position.z += (targetPosZ - sceneGroup.position.z) * 0.05;
+    // Smooth parallax rotation
+    sceneGroup.rotation.y += (targetRotY - sceneGroup.rotation.y) * 0.04;
+    sceneGroup.rotation.x += (targetRotX - sceneGroup.rotation.x) * 0.04;
+    sceneGroup.rotation.z += (Math.sin(time * 0.2) * 0.1 - sceneGroup.rotation.z) * 0.04;
+    sceneGroup.position.x += (targetPosX - sceneGroup.position.x) * 0.04;
+    sceneGroup.position.y += (targetPosY - sceneGroup.position.y) * 0.04;
+    sceneGroup.position.z += (targetPosZ - sceneGroup.position.z) * 0.04;
 
     renderer.render(scene, camera);
   }
 
-  // Resize handler for hero canvas
-  function resizeSkeletal() {
-    const w = container.clientWidth;
-    const h = container.clientHeight;
-    camera.aspect = w / h;
+  // Resize
+  function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
+    renderer.setSize(window.innerWidth, window.innerHeight);
   }
-  window.addEventListener('resize', resizeSkeletal);
+  window.addEventListener('resize', onResize);
 
   animate();
 })();
 
 
-// ═══════════════════════════════════════════════════════
-// OLD 2D FLOATING PARTICLES (non-hero subtle bg)
-// ═══════════════════════════════════════════════════════
+// ── 2D FLOATING PARTICLES (subtle background noise)
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 let W, H, particles = [];
-
 function resizeCanvas() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
 resizeCanvas(); addEventListener('resize', resizeCanvas);
-
 const COLORS = ['#8b5cf6','#34d399','#f472b6','#60a5fa','#facc15'];
-for(let i=0;i<60;i++){
+for(let i=0;i<50;i++){
   particles.push({
     x: Math.random()*1920, y: Math.random()*1080,
-    r: Math.random()*1.8+.4,
-    vx:(Math.random()-.5)*.3,
-    vy:(Math.random()-.5)*.3,
+    r: Math.random()*1.5+.4,
+    vx:(Math.random()-.5)*.25, vy:(Math.random()-.5)*.25,
     color: COLORS[Math.floor(Math.random()*COLORS.length)],
-    alpha: Math.random()*.5+.1
+    alpha: Math.random()*.35+.08
   });
 }
-
 function drawParticles(){
   ctx.clearRect(0,0,W,H);
   particles.forEach(p=>{
@@ -898,7 +940,7 @@ function drawParticles(){
     ctx.save();
     ctx.globalAlpha=p.alpha;
     ctx.fillStyle=p.color;
-    ctx.shadowBlur=6; ctx.shadowColor=p.color;
+    ctx.shadowBlur=5; ctx.shadowColor=p.color;
     ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
     ctx.restore();
   });
