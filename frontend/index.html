@@ -51,7 +51,7 @@
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 clamp(20px, 5vw, 80px);
+      padding: 0 clamp(16px, 5vw, 80px);
       height: 64px;
       background: rgba(0,0,0,0.65);
       backdrop-filter: blur(20px);
@@ -69,6 +69,7 @@
       background: linear-gradient(135deg, var(--primary), var(--accent));
       box-shadow: 0 0 10px var(--primary);
       animation: pulse 2s infinite;
+      flex-shrink: 0;
     }
     @keyframes pulse {
       0%,100% { box-shadow: 0 0 10px var(--primary); }
@@ -89,11 +90,45 @@
     }
     .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 0 32px rgba(139,92,246,.6); }
 
+    /* ── MOBILE NAV ── */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column; gap: 5px;
+      background: none; border: none; cursor: pointer; padding: 8px;
+    }
+    .nav-hamburger span {
+      display: block; width: 22px; height: 2px;
+      background: var(--text); border-radius: 2px; transition: all .3s;
+    }
+    .mobile-menu {
+      display: none;
+      position: fixed; top: 64px; left: 0; right: 0;
+      background: rgba(0,0,0,0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      padding: 16px clamp(16px,5vw,80px) 20px;
+      z-index: 99;
+      flex-direction: column; gap: 4px;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      color: var(--muted); text-decoration: none; font-size: .95rem; font-weight: 500;
+      padding: 12px 16px; border-radius: 10px; transition: all .2s;
+      min-height: 44px; display: flex; align-items: center;
+    }
+    .mobile-menu a:hover { color: var(--text); background: rgba(255,255,255,.06); }
+    .mobile-menu .mobile-cta {
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color: #fff; font-weight: 700; margin-top: 8px;
+      justify-content: center; border-radius: 999px;
+    }
+
     /* ── HERO ── */
     .hero {
       position: relative;
       width: 100vw;
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -101,7 +136,8 @@
       text-align: center;
       z-index: 2;
       padding: 0 clamp(20px, 6vw, 100px);
-      padding-top: 64px;
+      padding-top: 80px;
+      padding-bottom: 60px;
     }
     .hero::before {
       content: '';
@@ -122,6 +158,7 @@
       flex-direction: column;
       align-items: center;
       max-width: 820px;
+      width: 100%;
     }
     .hero-badge {
       display: inline-flex; align-items: center; gap: 8px;
@@ -137,7 +174,7 @@
 
     .hero-title {
       font-family: var(--font-display);
-      font-size: clamp(3.2rem, 8vw, 7.5rem);
+      font-size: clamp(2.8rem, 8vw, 7.5rem);
       font-weight: 800;
       line-height: 1.0;
       letter-spacing: -.04em;
@@ -160,7 +197,7 @@
 
     .hero-sub {
       font-family: var(--font-body);
-      font-size: clamp(1rem, 1.6vw, 1.15rem);
+      font-size: clamp(.95rem, 1.6vw, 1.15rem);
       font-weight: 400;
       color: rgba(220,220,235,0.9);
       max-width: 540px;
@@ -182,7 +219,7 @@
       padding: 14px 32px; border-radius: 999px;
       box-shadow: 0 0 28px rgba(139,92,246,.45);
       transition: all .2s; display: flex; align-items: center; gap: 8px;
-      letter-spacing: .01em;
+      letter-spacing: .01em; min-height: 44px;
     }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 44px rgba(139,92,246,.7); }
     .btn-secondary {
@@ -191,7 +228,7 @@
       color: var(--text); text-decoration: none; font-weight: 600; font-size: .95rem;
       padding: 14px 32px; border-radius: 999px;
       transition: all .2s; display: flex; align-items: center; gap: 8px;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px); min-height: 44px;
     }
     .btn-secondary:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.24); transform: translateY(-2px); }
 
@@ -246,21 +283,21 @@
       -webkit-backdrop-filter: blur(20px);
       border-top: 1px solid rgba(255,255,255,.07);
       border-bottom: 1px solid rgba(255,255,255,.07);
-      padding: 40px clamp(20px,5vw,80px);
-      display: flex; justify-content: center; gap: clamp(40px,8vw,120px);
+      padding: 40px clamp(16px,5vw,80px);
+      display: flex; justify-content: center; gap: clamp(24px,8vw,120px);
       flex-wrap: wrap;
     }
     .stat { text-align: center; }
     .stat-num {
       font-family: var(--font-display);
-      font-size: 2.6rem; font-weight: 800; letter-spacing: -.04em;
+      font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -.04em;
       background: linear-gradient(135deg, var(--primary), var(--accent));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     .stat-label { color: var(--muted); font-size: .82rem; margin-top: 4px; font-weight: 500; }
 
     /* ── SECTIONS ── */
-    section { padding: 100px clamp(20px,5vw,80px); max-width: 1200px; margin: 0 auto; }
+    section { padding: clamp(60px,8vw,100px) clamp(16px,5vw,80px); max-width: 1200px; margin: 0 auto; }
     .section-tag {
       display: inline-block;
       background: rgba(139,92,246,.1); border: 1px solid rgba(139,92,246,.22);
@@ -270,15 +307,15 @@
     }
     .section-title {
       font-family: var(--font-display);
-      font-size: clamp(1.9rem, 4vw, 3.2rem); font-weight: 800;
+      font-size: clamp(1.7rem, 4vw, 3.2rem); font-weight: 800;
       letter-spacing: -.035em; margin-bottom: 16px; line-height: 1.1;
     }
-    .section-sub { color: var(--muted); font-size: 1rem; line-height: 1.75; max-width: 560px; font-weight: 400; }
+    .section-sub { color: var(--muted); font-size: clamp(.88rem,1.2vw,1rem); line-height: 1.75; max-width: 560px; font-weight: 400; }
 
     /* ── FEATURES GRID ── */
     .features-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(280px,100%), 1fr));
       gap: 18px; margin-top: 52px;
     }
     .feature-card {
@@ -307,7 +344,7 @@
 
     /* ── HOW IT WORKS ── */
     .how-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; margin-top: 52px; }
-    @media(max-width:768px){ .how-wrap { grid-template-columns:1fr; } }
+    @media(max-width:768px){ .how-wrap { grid-template-columns:1fr; gap: 36px; } }
     .steps { display: flex; flex-direction: column; gap: 26px; }
     .step { display: flex; gap: 16px; align-items: flex-start; }
     .step-num {
@@ -353,7 +390,7 @@
     .collab-section {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 80px clamp(20px,5vw,80px);
+      padding: clamp(60px,8vw,80px) clamp(16px,5vw,80px);
     }
     .collab-intro {
       margin-bottom: 52px;
@@ -362,17 +399,10 @@
       margin-top: 8px;
     }
 
-    /* Two-col layout: left = description + live count, right = room cards */
-    .collab-layout {
-      display: grid;
-      grid-template-columns: 1fr 1.1fr;
-      gap: 48px;
-      align-items: start;
-    }
-    @media(max-width: 900px) { .collab-layout { grid-template-columns: 1fr; } }
-
+    /* Full-width description, no room cards */
     .collab-desc {
       display: flex; flex-direction: column; gap: 20px;
+      max-width: 680px;
     }
     .collab-desc p {
       color: var(--muted); font-size: .95rem; line-height: 1.8;
@@ -409,96 +439,18 @@
     .hcs-text { font-size: .88rem; color: var(--muted); line-height: 1.6; padding-top: 3px; }
     .hcs-text b { color: var(--text); font-weight: 600; }
 
-    /* Room cards on the right */
-    .room-cards {
-      display: flex; flex-direction: column; gap: 20px;
-    }
-    .room-card {
-      background: rgba(13,13,13,0.72);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255,255,255,.07);
-      border-radius: 20px; padding: 28px 28px 24px;
-      transition: all .3s;
-      position: relative; overflow: hidden;
-    }
-    .room-card::before {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(139,92,246,.05), transparent);
-      opacity: 0; transition: opacity .3s;
-    }
-    .room-card:hover { border-color: rgba(139,92,246,.3); transform: translateY(-3px); box-shadow: 0 16px 44px rgba(0,0,0,.55); }
-    .room-card:hover::before { opacity: 1; }
-
-    .room-card-header {
-      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
-    }
-    .room-card-icon {
-      width: 40px; height: 40px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem; flex-shrink: 0;
-    }
-    .room-card-header h3 {
-      font-family: var(--font-display); font-size: 1rem; font-weight: 700;
-      letter-spacing: -.01em;
-    }
-    .room-card-header p {
-      color: var(--muted); font-size: .8rem; margin-top: 2px;
-    }
-    .room-card-body {
-      display: flex; gap: 10px; align-items: center;
-    }
-    .room-input {
-      flex: 1; background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 10px; padding: 10px 14px;
-      color: var(--text); font-size: .88rem; font-family: var(--font-body);
-      outline: none; transition: border-color .2s;
-    }
-    .room-input:focus { border-color: rgba(139,92,246,.5); background: rgba(139,92,246,.05); }
-    .room-input::placeholder { color: rgba(156,163,175,.5); }
-    .room-btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-family: var(--font-body); font-weight: 700; font-size: .85rem;
-      border: none; cursor: pointer; border-radius: 10px; padding: 10px 18px;
-      transition: all .2s; white-space: nowrap;
-    }
-    .room-btn-create {
+    /* CTA button inside collab */
+    .collab-cta-btn {
+      display: inline-flex; align-items: center; gap: 8px;
       background: linear-gradient(135deg, var(--primary), var(--primary2));
-      color: #fff;
-      box-shadow: 0 0 18px rgba(139,92,246,.35);
+      color: #fff; text-decoration: none; font-weight: 700; font-size: .95rem;
+      padding: 14px 32px; border-radius: 999px;
+      box-shadow: 0 0 28px rgba(139,92,246,.45);
+      transition: all .2s; border: none; cursor: pointer;
+      font-family: var(--font-body); min-height: 44px;
+      margin-top: 8px; width: fit-content;
     }
-    .room-btn-create:hover { transform: translateY(-1px); box-shadow: 0 0 28px rgba(139,92,246,.6); }
-    .room-btn-create:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-    .room-btn-join {
-      background: rgba(52,211,153,.12);
-      border: 1px solid rgba(52,211,153,.25);
-      color: #34d399;
-    }
-    .room-btn-join:hover { background: rgba(52,211,153,.2); transform: translateY(-1px); }
-
-    /* Room code display after creation */
-    .room-code-display {
-      display: none;
-      margin-top: 14px;
-      background: rgba(139,92,246,.08);
-      border: 1px solid rgba(139,92,246,.2);
-      border-radius: 10px; padding: 12px 16px;
-      align-items: center; justify-content: space-between; gap: 10px;
-    }
-    .room-code-display.show { display: flex; }
-    .room-code-val {
-      font-family: 'Courier New', monospace; font-size: 1.3rem; font-weight: 700;
-      letter-spacing: .2em; color: #a78bfa;
-    }
-    .copy-btn {
-      background: rgba(139,92,246,.15); border: 1px solid rgba(139,92,246,.25);
-      color: #a78bfa; border-radius: 8px; padding: 6px 12px;
-      font-size: .75rem; font-weight: 600; cursor: pointer;
-      transition: all .2s; font-family: var(--font-body);
-    }
-    .copy-btn:hover { background: rgba(139,92,246,.28); }
-    .copy-btn.copied { color: #34d399; border-color: rgba(52,211,153,.3); background: rgba(52,211,153,.1); }
+    .collab-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 0 44px rgba(139,92,246,.7); }
 
     /* ── TECH STACK ── */
     .tech-section {
@@ -507,7 +459,7 @@
       -webkit-backdrop-filter: blur(16px);
       border-top:1px solid rgba(255,255,255,.06);
       border-bottom:1px solid rgba(255,255,255,.06);
-      padding: 80px clamp(20px,5vw,80px);
+      padding: clamp(60px,8vw,80px) clamp(16px,5vw,80px);
     }
     .tech-section > div { max-width: 1200px; margin: 0 auto; }
     .tech-grid { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
@@ -525,7 +477,7 @@
 
     /* ── CTA ── */
     .cta-section {
-      text-align: center; padding: 120px clamp(20px,5vw,80px);
+      text-align: center; padding: clamp(80px,10vw,120px) clamp(16px,5vw,80px);
       position: relative; overflow: hidden;
     }
     .cta-section::before {
@@ -535,7 +487,7 @@
       top: 50%; left: 50%; transform: translate(-50%,-50%);
       pointer-events: none;
     }
-    .cta-section .section-title { font-size: clamp(2rem,5vw,4rem); }
+    .cta-section .section-title { font-size: clamp(1.8rem,5vw,4rem); }
     .cta-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 
     /* ── FOOTER ── */
@@ -544,12 +496,12 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-top: 1px solid rgba(255,255,255,.06);
-      padding: 36px clamp(20px,5vw,80px);
+      padding: 36px clamp(16px,5vw,80px);
       display: flex; align-items: center; justify-content: space-between;
       flex-wrap: wrap; gap: 16px;
     }
     .footer-logo { font-family: var(--font-display); font-weight: 800; font-size: .95rem; letter-spacing: -.02em; }
-    .footer-links { display: flex; gap: 20px; }
+    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
     .footer-links a { color: var(--muted); text-decoration: none; font-size: .84rem; transition: color .2s; }
     .footer-links a:hover { color: var(--text); }
     .footer-copy { color: var(--muted); font-size: .8rem; }
@@ -560,10 +512,32 @@
 
     /* ── RESPONSIVE ── */
     @media(max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
       .hero { padding-top: 80px; }
       .hero-title { font-size: clamp(2.4rem, 10vw, 4rem); }
-      .nav-links .nav-link { display: none; }
-      .stats-bar { gap: 28px; }
+      .hero-btns { flex-direction: column; width: 100%; }
+      .hero-btns a { width: 100%; justify-content: center; }
+      .stats-bar { gap: 20px; padding: 28px 16px; }
+      .stat-num { font-size: 1.8rem; }
+      .how-visual { padding: 20px 16px; }
+      .gesture-demo { padding: 10px 12px; }
+      .gesture-demo .emoji { font-size: 1.4rem; }
+      .gd-badge { display: none; }
+      .cta-btns { flex-direction: column; align-items: center; }
+      .cta-btns a { width: 100%; max-width: 320px; justify-content: center; }
+      footer { flex-direction: column; text-align: center; }
+      .footer-links { justify-content: center; }
+      .collab-cta-btn { width: 100%; justify-content: center; }
+    }
+
+    @media(max-width: 480px) {
+      .hero-badge { font-size: .68rem; padding: 4px 14px; }
+      .hero-pills { gap: 6px; }
+      .g-pill { font-size: .72rem; padding: 6px 11px; }
+      .features-grid { gap: 12px; }
+      .feature-card { padding: 20px; }
+      .how-visual { display: none; }
     }
   </style>
 </head>
@@ -585,7 +559,19 @@
     <a href="/history.html" class="nav-link">📂 History</a>
     <a href="/app.html" class="nav-cta">🎨 Open Studio</a>
   </div>
+  <button class="nav-hamburger" id="hamburgerBtn" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#features" onclick="closeMobileMenu()">Features</a>
+  <a href="#how" onclick="closeMobileMenu()">How it Works</a>
+  <a href="#collab" onclick="closeMobileMenu()">Collaborate</a>
+  <a href="/history.html">📂 History</a>
+  <a href="/app.html" class="mobile-cta">🎨 Open Studio</a>
+</div>
 
 <!-- HERO -->
 <div class="hero">
@@ -736,75 +722,27 @@
     <p class="section-sub">Your friend opens this app and enters your room code — that's it. No accounts, no setup. Just two hands on the same canvas.</p>
   </div>
 
-  <div class="collab-layout">
-    <!-- Left: description + how it works -->
-    <div class="collab-desc">
-      <div class="live-badge">
-        <div class="live-dot"></div>
-        Live rooms · WebSocket powered
+  <div class="collab-desc">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      Live rooms · WebSocket powered
+    </div>
+    <p>Create a room and get a short shareable code. Send it to a friend. The moment they join, your canvases sync — every stroke, every gesture, every brushstroke in real time.</p>
+    <div class="how-collab">
+      <div class="how-collab-step">
+        <div class="hcs-num">1</div>
+        <div class="hcs-text"><b>Create a room</b> — you'll get a short code to share with your friend.</div>
       </div>
-      <p>Create a room and get a short shareable code. Send it to a friend. The moment they join, your canvases sync — every stroke, every gesture, every brushstroke in real time.</p>
-      <div class="how-collab">
-        <div class="how-collab-step">
-          <div class="hcs-num">1</div>
-          <div class="hcs-text"><b>Create a room</b> — you'll get a short code to share with your friend.</div>
-        </div>
-        <div class="how-collab-step">
-          <div class="hcs-num">2</div>
-          <div class="hcs-text"><b>Share the code</b> — send it over chat, message, anything.</div>
-        </div>
-        <div class="how-collab-step">
-          <div class="hcs-num">3</div>
-          <div class="hcs-text"><b>Draw together</b> — strokes appear live on both canvases instantly.</div>
-        </div>
+      <div class="how-collab-step">
+        <div class="hcs-num">2</div>
+        <div class="hcs-text"><b>Share the code</b> — send it over chat, message, anything.</div>
+      </div>
+      <div class="how-collab-step">
+        <div class="hcs-num">3</div>
+        <div class="hcs-text"><b>Draw together</b> — strokes appear live on both canvases instantly.</div>
       </div>
     </div>
-
-    <!-- Right: room action cards -->
-    <div class="room-cards">
-      <!-- Create Room -->
-      <div class="room-card">
-        <div class="room-card-header">
-          <div class="room-card-icon" style="background:rgba(139,92,246,.15)">✦</div>
-          <div>
-            <h3>Create a New Room</h3>
-            <p>Get a short code to share with your friend</p>
-          </div>
-        </div>
-        <div class="room-card-body">
-          <button class="room-btn room-btn-create" id="createRoomBtn" onclick="createRoom()">
-            ✦ Create Room
-          </button>
-        </div>
-        <div class="room-code-display" id="roomCodeDisplay">
-          <div>
-            <div style="font-size:.72rem;color:var(--muted);margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase;">Your Room Code</div>
-            <div class="room-code-val" id="roomCodeVal">——</div>
-          </div>
-          <button class="copy-btn" id="copyBtn" onclick="copyCode()">Copy</button>
-        </div>
-      </div>
-
-      <!-- Join Room -->
-      <div class="room-card">
-        <div class="room-card-header">
-          <div class="room-card-icon" style="background:rgba(52,211,153,.12)">🔗</div>
-          <div>
-            <h3>Join a Room</h3>
-            <p>Enter the code your friend shared with you</p>
-          </div>
-        </div>
-        <div class="room-card-body">
-          <input class="room-input" id="joinCodeInput" type="text" maxlength="8"
-            placeholder="Enter room code…"
-            oninput="this.value=this.value.toUpperCase()"
-            onkeydown="if(event.key==='Enter')joinRoom()" />
-          <button class="room-btn room-btn-join" onclick="joinRoom()">
-            🔗 Join
-          </button>
-        </div>
-      </div>
-    </div>
+    <a href="/app.html" class="collab-cta-btn">✦ Start Drawing Together</a>
   </div>
 </div>
 
@@ -857,49 +795,20 @@
 </div><!-- end .page-body -->
 
 <script>
-/* ── ROOM LOGIC ── */
-function createRoom() {
-  const btn = document.getElementById('createRoomBtn');
-  btn.textContent = '⏳ Creating…';
-  btn.disabled = true;
-  fetch('https://newgesture.onrender.com/api/rooms', { method: 'POST' })
-    .then(r => r.json())
-    .then(data => {
-      const code = data.room_id;
-      document.getElementById('roomCodeVal').textContent = code;
-      const disp = document.getElementById('roomCodeDisplay');
-      disp.classList.add('show');
-      btn.textContent = '✦ Enter Room →';
-      btn.disabled = false;
-      const copyBtn = document.getElementById('copyBtn');
-      copyBtn.classList.remove('copied');
-      copyBtn.textContent = 'Copy';
-      navigator.clipboard.writeText(code).catch(() => {});
-      btn.onclick = () => { window.location.href = '/collab.html?room=' + code + '&host=1'; };
-      window.location.href = '/collab.html?room=' + code + '&host=1';
-    })
-    .catch(() => {
-      btn.textContent = '✦ Create Room';
-      btn.disabled = false;
-    });
+/* ── MOBILE NAV ── */
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const mobileMenu = document.getElementById('mobileMenu');
+hamburgerBtn.addEventListener('click', () => {
+  mobileMenu.classList.toggle('open');
+});
+function closeMobileMenu() {
+  mobileMenu.classList.remove('open');
 }
-function copyCode() {
-  const code = document.getElementById('roomCodeVal').textContent;
-  if (code === '——') return;
-  navigator.clipboard.writeText(code).catch(() => {});
-  const btn = document.getElementById('copyBtn');
-  btn.textContent = 'Copied!';
-  btn.classList.add('copied');
-  setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
-}
-function joinRoom() {
-  const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
-  if (code.length < 4) {
-    document.getElementById('joinCodeInput').focus();
-    return;
+document.addEventListener('click', (e) => {
+  if (!hamburgerBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+    mobileMenu.classList.remove('open');
   }
-  window.location.href = '/collab.html?room=' + code;
-}
+});
 </script>
 
 <script>
@@ -1029,7 +938,6 @@ function joinRoom() {
     const mesh=new THREE.Points(geo,mat);
     const grp=new THREE.Group();
     grp.add(mesh);
-    /* Hand centered in viewport */
     grp.position.x = 0;
     scene.add(grp);
 
