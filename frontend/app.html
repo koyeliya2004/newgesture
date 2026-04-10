@@ -67,6 +67,8 @@
     .tbar-btn:hover{background:var(--surface2);border-color:var(--primary);}
     .tbar-btn.danger:hover{border-color:var(--erase);color:var(--erase);}
     .tbar-btn.success:hover{border-color:var(--move);color:var(--move);}
+    .tbar-btn.collab-btn{background:linear-gradient(135deg,rgba(139,92,246,.18),rgba(52,211,153,.18));border-color:rgba(139,92,246,.5);color:#a78bfa;font-weight:700;}
+    .tbar-btn.collab-btn:hover{background:linear-gradient(135deg,rgba(139,92,246,.35),rgba(52,211,153,.35));border-color:#a78bfa;color:#fff;transform:scale(1.04);}
     .bg-group{display:flex;gap:4px;flex-shrink:0;}
     .bg-btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:4px 7px;cursor:pointer;font-size:.72rem;font-family:'Satoshi',sans-serif;transition:all .15s;}
     .bg-btn:hover,.bg-btn.active{background:var(--surface2);border-color:var(--primary);color:var(--text);}
@@ -182,6 +184,8 @@
   <button class="tbar-btn" id="saveImgBtn">🖼 PNG</button>
   <button class="tbar-btn success" id="saveSessionBtn">☁️ Save</button>
   <a href="/history.html" class="tbar-btn" style="text-decoration:none">📂 History</a>
+  <div class="tbar-divider"></div>
+  <a href="/collab.html" class="tbar-btn collab-btn" style="text-decoration:none">🤝 Collaborate</a>
 </div>
 <div class="app">
   <canvas id="bgCanvas"></canvas>
