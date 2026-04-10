@@ -876,9 +876,7 @@ function createRoom() {
       copyBtn.textContent = 'Copy';
       navigator.clipboard.writeText(code).catch(() => {});
       btn.onclick = () => { window.location.href = '/collab.html?room=' + code + '&host=1'; };
-      setTimeout(() => {
-        window.location.href = '/collab.html?room=' + code + '&host=1';
-      }, 1800);
+      window.location.href = '/collab.html?room=' + code + '&host=1';
     })
     .catch(() => {
       btn.textContent = '✦ Create Room';
