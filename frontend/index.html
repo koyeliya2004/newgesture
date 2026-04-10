@@ -607,269 +607,333 @@
 <script>
 // ═══════════════════════════════════════════════════════════════
 // 3D SKELETAL HAND — FIXED FULL-PAGE BACKGROUND
-// Pure black bg. Hand centered on screen.
-// Mouse parallax: smooth, responsive, not jittery.
+// Dense particle hand with bg wave particles, mouse+touch parallax,
+// complex finger animation. Exact visual from provided source.
 // ═══════════════════════════════════════════════════════════════
 (function() {
-  const container = document.getElementById('skeletal-bg');
+    const container = document.getElementById('skeletal-bg');
+    const scene = new THREE.Scene();
 
-  const scene = new THREE.Scene();
-  // No fog tint — pure black
-  scene.background = new THREE.Color(0x000000);
+    // Atmospheric fog matching dark bg
+    scene.fog = new THREE.FogExp2(0x050a10, 0.03);
 
-  const W = window.innerWidth, H = window.innerHeight;
-  const camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 1000);
-  camera.position.set(0, 1, 13);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 13;
+    camera.position.y = 2;
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(W, H);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  container.appendChild(renderer.domElement);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
 
-  // --- BONE NODE ---
-  class BoneNode {
-    constructor(localPos) {
-      this.localPos = localPos;
-      this.rotation = new THREE.Euler();
-      this.children = [];
-      this.worldPos = new THREE.Vector3();
-      this.worldMatrix = new THREE.Matrix4();
+    // --- BACKGROUND SMALL WAVE PARTICLES ---
+    const bgParticleCount = 5000;
+    const bgGeometry = new THREE.BufferGeometry();
+    const bgPositions = new Float32Array(bgParticleCount * 3);
+    const bgInitialY = new Float32Array(bgParticleCount);
+
+    for (let i = 0; i < bgParticleCount; i++) {
+        bgPositions[i * 3]     = (Math.random() - 0.5) * 150;
+        bgPositions[i * 3 + 1] = (Math.random() - 0.5) * 80;
+        bgPositions[i * 3 + 2] = (Math.random() - 0.5) * 50 - 40;
+        bgInitialY[i] = bgPositions[i * 3 + 1];
     }
-    update(parentMatrix) {
-      const localMat = new THREE.Matrix4().makeTranslation(this.localPos.x, this.localPos.y, this.localPos.z);
-      const rotMat = new THREE.Matrix4().makeRotationFromEuler(this.rotation);
-      localMat.multiply(rotMat);
-      this.worldMatrix = parentMatrix
-        ? new THREE.Matrix4().multiplyMatrices(parentMatrix, localMat)
-        : localMat.clone();
-      this.worldPos.setFromMatrixPosition(this.worldMatrix);
-      this.children.forEach(c => c.update(this.worldMatrix));
-    }
-  }
 
-  function createFinger(parent, baseOffset, lengths, baseRot) {
-    let base = new BoneNode(baseOffset);
-    base.rotation.copy(baseRot);
-    parent.children.push(base);
-    let nodes = [base], current = base;
-    for (let len of lengths) {
-      let next = new BoneNode(new THREE.Vector3(0, len, 0));
-      current.children.push(next);
-      nodes.push(next);
-      current = next;
-    }
-    return nodes;
-  }
+    bgGeometry.setAttribute('position', new THREE.BufferAttribute(bgPositions, 3));
+    bgGeometry.setAttribute('initialY', new THREE.BufferAttribute(bgInitialY, 1));
 
-  // Build hand skeleton — centered, slightly larger scale
-  const wrist  = new BoneNode(new THREE.Vector3(0, -5.5, 0));
-  const thumb  = createFinger(wrist, new THREE.Vector3(-2.2, 1.2, 1.5), [1.9, 1.3], new THREE.Euler(0.5,-0.6,0.8));
-  const index  = createFinger(wrist, new THREE.Vector3(-1.6, 3.8, 0),  [2.4,1.6,1.1], new THREE.Euler(0,0,0.15));
-  const middle = createFinger(wrist, new THREE.Vector3(0,   4.3, 0),   [2.8,1.9,1.3], new THREE.Euler(0,0,0));
-  const ring   = createFinger(wrist, new THREE.Vector3(1.6, 4.0, 0),   [2.5,1.7,1.2], new THREE.Euler(0,0,-0.15));
-  const pinky  = createFinger(wrist, new THREE.Vector3(3.0, 3.0, 0),   [1.9,1.4,1.0], new THREE.Euler(0,0,-0.3));
-  wrist.update(null);
-
-  // --- BUILD PARTICLE CLOUD ---
-  const particleData = [];
-
-  function addJointParticles(node, count, spread, hueMin, hueMax) {
-    for (let i = 0; i < count; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi   = Math.acos(Math.random() * 2 - 1);
-      const r     = Math.random() * spread;
-      particleData.push({
-        node,
-        localOffset: new THREE.Vector3(
-          r * Math.sin(phi) * Math.cos(theta),
-          r * Math.sin(phi) * Math.sin(theta),
-          r * Math.cos(phi)
-        ),
-        color: new THREE.Color().setHSL(hueMin + Math.random() * (hueMax - hueMin), 1.0, 0.6)
-      });
-    }
-  }
-
-  function addBoneParticles(parent, child, density, thick, hueMin, hueMax) {
-    const boneVec = child.localPos.clone();
-    const boneLen = boneVec.length();
-    const count   = Math.floor(boneLen * density);
-    for (let i = 0; i < count; i++) {
-      const t     = Math.random();
-      const r     = Math.random() * thick;
-      const theta = Math.random() * Math.PI * 2;
-      particleData.push({
-        node: parent,
-        localOffset: new THREE.Vector3(
-          r * Math.cos(theta),
-          0,
-          r * Math.sin(theta)
-        ).add(boneVec.clone().multiplyScalar(t)),
-        color: new THREE.Color().setHSL(hueMin + Math.random() * (hueMax - hueMin), 1.0, 0.55)
-      });
-    }
-  }
-
-  // Traverse all bones and add particles
-  function traverseHand(node, isRoot) {
-    // Joint sphere particles
-    const isWrist = isRoot;
-    addJointParticles(node, isWrist ? 500 : 300, isWrist ? 0.55 : 0.38, 0.78, 0.88);
-    // Bone particles for each child
-    node.children.forEach(child => {
-      const isPalm = isRoot;
-      addBoneParticles(node, child, isPalm ? 750 : 420, isPalm ? 0.55 : 0.22, 0.48, 0.60);
-      traverseHand(child, false);
+    const bgMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+            time:  { value: 0 },
+            color: { value: new THREE.Color(0x1166aa) }
+        },
+        vertexShader: `
+            uniform float time;
+            attribute float initialY;
+            void main() {
+                vec3 pos = position;
+                float waveX = sin(pos.x * 0.1 + time * 1.5) * 3.0;
+                float waveZ = cos(pos.z * 0.1 + time * 1.0) * 3.0;
+                pos.y = initialY + waveX + waveZ;
+                vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                gl_PointSize = (6.0 / -mvPosition.z);
+                gl_Position = projectionMatrix * mvPosition;
+            }
+        `,
+        fragmentShader: `
+            uniform vec3 color;
+            void main() {
+                vec2 coord = gl_PointCoord - vec2(0.5);
+                float dist = length(coord);
+                if (dist > 0.5) discard;
+                float alpha = smoothstep(0.5, 0.1, dist) * 0.6;
+                gl_FragColor = vec4(color, alpha);
+            }
+        `,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
     });
-  }
-  traverseHand(wrist, true);
 
-  // Build BufferGeometry
-  const N = particleData.length;
-  const positions = new Float32Array(N * 3);
-  const colors    = new Float32Array(N * 3);
+    const bgParticleMesh = new THREE.Points(bgGeometry, bgMaterial);
+    scene.add(bgParticleMesh);
 
-  particleData.forEach((p, i) => {
-    positions[i*3]   = p.node.worldPos.x + p.localOffset.x;
-    positions[i*3+1] = p.node.worldPos.y + p.localOffset.y;
-    positions[i*3+2] = p.node.worldPos.z + p.localOffset.z;
-    colors[i*3]   = p.color.r;
-    colors[i*3+1] = p.color.g;
-    colors[i*3+2] = p.color.b;
-  });
+    // --- BONE NODE CLASS ---
+    class BoneNode {
+        constructor(localPos) {
+            this.localPos = localPos;
+            this.rotation = new THREE.Euler();
+            this.children = [];
+            this.worldPos = new THREE.Vector3();
+            this.worldMatrix = new THREE.Matrix4();
+        }
+        update(parentMatrix) {
+            const localMat = new THREE.Matrix4().makeTranslation(this.localPos.x, this.localPos.y, this.localPos.z);
+            const rotMat = new THREE.Matrix4().makeRotationFromEuler(this.rotation);
+            localMat.multiply(rotMat);
+            if (parentMatrix) {
+                this.worldMatrix.multiplyMatrices(parentMatrix, localMat);
+            } else {
+                this.worldMatrix.copy(localMat);
+            }
+            this.worldPos.setFromMatrixPosition(this.worldMatrix);
+            for (let child of this.children) {
+                child.update(this.worldMatrix);
+            }
+        }
+    }
 
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
+    function createFinger(parent, baseOffset, lengths, baseRot) {
+        let base = new BoneNode(baseOffset);
+        base.rotation.copy(baseRot);
+        parent.children.push(base);
+        let nodes = [base];
+        let current = base;
+        for (let len of lengths) {
+            let next = new BoneNode(new THREE.Vector3(0, len, 0));
+            current.children.push(next);
+            nodes.push(next);
+            current = next;
+        }
+        return nodes;
+    }
 
-  const material = new THREE.ShaderMaterial({
-    uniforms: {
-      time:        { value: 0 },
-      mouseX:      { value: 0 },
-      mouseY:      { value: 0 },
-    },
-    vertexShader: `
-      uniform float time;
-      uniform float mouseX;
-      uniform float mouseY;
-      attribute vec3 color;
-      varying vec3 vColor;
-      varying float vDist;
-
-      void main() {
-        vColor = color;
-        vec3 pos = position;
-
-        // Gentle idle wave breathing
-        float wave = sin(pos.x * 0.3 + time * 1.8) * 0.06
-                   + cos(pos.y * 0.3 + time * 1.4) * 0.06;
-        pos.x += wave;
-        pos.y += wave * 0.6;
-
-        // Mouse parallax — smooth and proportional
-        pos.x += mouseX * 1.4;
-        pos.y += mouseY * 1.0;
-
-        // Subtle Z drift per particle
-        float z = pos.z + sin(time * 0.8 + pos.x * 0.2) * 0.15;
-
-        vec4 mvPos = modelViewMatrix * vec4(pos.x, pos.y, z, 1.0);
-        gl_PointSize = clamp(900.0 / -mvPos.z, 1.5, 5.0);
-        gl_Position  = projectionMatrix * mvPos;
-
-        vDist = length(vec2(mouseX, mouseY));
-      }
-    `,
-    fragmentShader: `
-      varying vec3 vColor;
-      varying float vDist;
-      void main() {
-        vec2 coord = gl_PointCoord - vec2(0.5);
-        float d = length(coord);
-        if (d > 0.5) discard;
-        float alpha = smoothstep(0.5, 0.05, d);
-        // Slight brightness boost near mouse
-        vec3 col = vColor + vColor * (1.0 - vDist * 3.0) * 0.3;
-        gl_FragColor = vec4(col, alpha * 0.92);
-      }
-    `,
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    vertexColors: true
-  });
-
-  const handMesh = new THREE.Points(geometry, material);
-  // Center the hand vertically (wrist starts at -5.5, fingertips reach ~+5)
-  handMesh.position.set(0, 0.5, 0);
-  scene.add(handMesh);
-
-  // --- MOUSE PARALLAX ---
-  let targetMX = 0, targetMY = 0;
-  let currentMX = 0, currentMY = 0;
-  document.addEventListener('mousemove', (e) => {
-    // Normalize to -1..+1 range, centered
-    targetMX = (e.clientX / window.innerWidth  - 0.5) * 0.7;
-    targetMY = -(e.clientY / window.innerHeight - 0.5) * 0.5;
-  });
-
-  // --- GENTLE HAND BREATHING ANIMATION ---
-  const allBones = [];
-  function collectBones(node) {
-    allBones.push(node);
-    node.children.forEach(collectBones);
-  }
-  collectBones(wrist);
-
-  // Save original rotations
-  const baseRotations = allBones.map(b => b.rotation.clone());
-
-  let clock = 0;
-
-  function updateHandBreath(t) {
-    // Very subtle breathing / floating
-    allBones.forEach((bone, i) => {
-      const s = Math.sin(t * 0.5 + i * 0.3) * 0.015;
-      bone.rotation.z = baseRotations[i].z + s;
-      bone.rotation.x = baseRotations[i].x + s * 0.5;
-    });
+    // --- BUILD SKELETAL HAND ---
+    const wrist  = new BoneNode(new THREE.Vector3(0, -5, 0));
+    const thumb  = createFinger(wrist, new THREE.Vector3(-2.0, 1.0, 1.5), [1.8, 1.2],       new THREE.Euler(0.5, -0.6, 0.8));
+    const index  = createFinger(wrist, new THREE.Vector3(-1.5, 3.5, 0),   [2.2, 1.5, 1.0],  new THREE.Euler(0, 0, 0.15));
+    const middle = createFinger(wrist, new THREE.Vector3(0,    4.0, 0),   [2.6, 1.8, 1.2],  new THREE.Euler(0, 0, 0));
+    const ring   = createFinger(wrist, new THREE.Vector3(1.5,  3.8, 0),   [2.4, 1.6, 1.1],  new THREE.Euler(0, 0, -0.15));
+    const pinky  = createFinger(wrist, new THREE.Vector3(2.8,  2.8, 0),   [1.8, 1.3, 0.9],  new THREE.Euler(0, 0, -0.3));
     wrist.update(null);
 
-    // Update particle positions from bone world positions
-    particleData.forEach((p, i) => {
-      positions[i*3]   = p.node.worldPos.x + p.localOffset.x;
-      positions[i*3+1] = p.node.worldPos.y + p.localOffset.y;
-      positions[i*3+2] = p.node.worldPos.z + p.localOffset.z;
+    // --- GENERATE PARTICLES AROUND SKELETON ---
+    const particleData = [];
+
+    function generateParticles(node, parentNode) {
+        // Joint particles — dense magenta spheres
+        const numJointParticles = 350;
+        for (let i = 0; i < numJointParticles; i++) {
+            let theta = Math.random() * Math.PI * 2;
+            let phi = Math.acos((Math.random() * 2) - 1);
+            let r = Math.random() * 0.4;
+            particleData.push({
+                node: node,
+                localOffset: new THREE.Vector3(
+                    r * Math.sin(phi) * Math.cos(theta),
+                    r * Math.sin(phi) * Math.sin(theta),
+                    r * Math.cos(phi)
+                ),
+                color: new THREE.Color().setHSL(0.8 + Math.random() * 0.15, 1.0, 0.6)
+            });
+        }
+
+        // Bone particles — dense cyan cylinders with white core wiring
+        if (parentNode) {
+            let boneLength = node.localPos.length();
+            let isPalm = (parentNode === wrist);
+            let density = isPalm ? 700 : 400;
+            let numBoneParticles = Math.floor(boneLength * density);
+            let boneThickness = isPalm ? 0.6 : 0.25;
+
+            for (let i = 0; i < numBoneParticles; i++) {
+                let t = Math.random();
+                let r = Math.random() * boneThickness;
+                let theta = Math.random() * Math.PI * 2;
+                let lx = r * Math.cos(theta);
+                let lz = r * Math.sin(theta);
+                let localPosInParent = new THREE.Vector3(lx, 0, lz).add(node.localPos.clone().multiplyScalar(t));
+                particleData.push({
+                    node: parentNode,
+                    localOffset: localPosInParent,
+                    color: new THREE.Color().setHSL(0.5 + Math.random() * 0.1, 1.0, 0.5)
+                });
+                // White inner core (30% chance)
+                if (Math.random() > 0.7) {
+                    let innerR = Math.random() * boneThickness * 0.15;
+                    let innerLx = innerR * Math.cos(theta);
+                    let innerLz = innerR * Math.sin(theta);
+                    let innerLocalPos = new THREE.Vector3(innerLx, 0, innerLz).add(node.localPos.clone().multiplyScalar(t));
+                    particleData.push({
+                        node: parentNode,
+                        localOffset: innerLocalPos,
+                        color: new THREE.Color(0xffffff)
+                    });
+                }
+            }
+        }
+
+        for (let child of node.children) {
+            generateParticles(child, node);
+        }
+    }
+
+    generateParticles(wrist, null);
+
+    // --- THREE.JS BUFFER GEOMETRY ---
+    const particleCount = particleData.length;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+
+    for (let i = 0; i < particleCount; i++) {
+        colors[i*3]   = particleData[i].color.r;
+        colors[i*3+1] = particleData[i].color.g;
+        colors[i*3+2] = particleData[i].color.b;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
+
+    const shaderMaterial = new THREE.ShaderMaterial({
+        uniforms: { time: { value: 0 } },
+        vertexShader: `
+            attribute vec3 color;
+            varying vec3 vColor;
+            uniform float time;
+            void main() {
+                vColor = color;
+                vec3 pos = position;
+                float pulse = sin(time * 5.0 + position.y * 10.0 + position.z * 10.0) * 0.03;
+                pos.x += pulse;
+                pos.y += pulse;
+                vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                float sizeBase = 22.0 + sin(time * 3.0 + position.x * 5.0) * 8.0;
+                gl_PointSize = (sizeBase / -mvPosition.z);
+                gl_Position = projectionMatrix * mvPosition;
+            }
+        `,
+        fragmentShader: `
+            varying vec3 vColor;
+            void main() {
+                vec2 coord = gl_PointCoord - vec2(0.5);
+                float dist = length(coord);
+                if (dist > 0.5) discard;
+                float alpha = smoothstep(0.5, 0.1, dist);
+                gl_FragColor = vec4(vColor, alpha * 0.9 + 0.1);
+            }
+        `,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        transparent: true
     });
-    geometry.attributes.position.needsUpdate = true;
-  }
 
-  // --- RENDER LOOP ---
-  function animate() {
-    requestAnimationFrame(animate);
-    clock += 0.016;
+    const particleMesh = new THREE.Points(geometry, shaderMaterial);
+    const sceneGroup = new THREE.Group();
+    sceneGroup.add(particleMesh);
+    scene.add(sceneGroup);
 
-    // Lerp mouse for smooth parallax
-    currentMX += (targetMX - currentMX) * 0.06;
-    currentMY += (targetMY - currentMY) * 0.06;
+    // --- INTERACTION & ANIMATION VARIABLES ---
+    let mouseX = 0, mouseY = 0;
+    let targetRotX = 0, targetRotY = 0;
+    let targetPosX = 0, targetPosY = 0, targetPosZ = 0;
 
-    material.uniforms.time.value   = clock;
-    material.uniforms.mouseX.value = currentMX;
-    material.uniforms.mouseY.value = currentMY;
+    function updateTargetPositions(clientX, clientY) {
+        mouseX = (clientX / window.innerWidth) * 2 - 1;
+        mouseY = -(clientY / window.innerHeight) * 2 + 1;
+        targetRotY = mouseX * 1.2;
+        targetRotX = mouseY * 0.8;
+        targetPosX = mouseX * 1.5;
+        targetPosY = mouseY * 1.5;
+        let distFromCenter = Math.sqrt(mouseX*mouseX + mouseY*mouseY);
+        targetPosZ = distFromCenter * 5.0;
+    }
 
-    updateHandBreath(clock);
+    document.addEventListener('mousemove', (e) => { updateTargetPositions(e.clientX, e.clientY); });
+    document.addEventListener('touchstart', (e) => { if (e.touches.length > 0) updateTargetPositions(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+    document.addEventListener('touchmove',  (e) => { if (e.touches.length > 0) updateTargetPositions(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
 
-    renderer.render(scene, camera);
-  }
-  animate();
+    const clock = new THREE.Clock();
+    const tempVec = new THREE.Vector3();
 
-  // --- RESIZE ---
-  window.addEventListener('resize', () => {
-    const w = window.innerWidth, h = window.innerHeight;
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
-  });
+    // --- RENDER LOOP ---
+    function animate() {
+        requestAnimationFrame(animate);
+        const time = clock.getElapsedTime();
+
+        shaderMaterial.uniforms.time.value = time;
+        bgMaterial.uniforms.time.value = time;
+
+        // Update posture — complex independent finger animation
+        wrist.localPos.y = -5 + Math.sin(time * 0.8) * 0.8;
+        wrist.rotation.z = Math.sin(time * 0.5) * 0.1;
+
+        const fingersPhase = [
+            { chain: index,  phase: 0.0, speed: 1.2 },
+            { chain: middle, phase: 0.8, speed: 1.5 },
+            { chain: ring,   phase: 1.6, speed: 1.3 },
+            { chain: pinky,  phase: 2.4, speed: 1.6 }
+        ];
+
+        fingersPhase.forEach((f) => {
+            let curl   = (Math.sin(time * f.speed + f.phase) * 0.5 + 0.5) * 0.8 + 0.05;
+            let spread = Math.sin(time * f.speed * 0.5 + f.phase) * 0.15;
+            f.chain[0].rotation.x = curl * 0.3;
+            f.chain[0].rotation.z = spread;
+            f.chain[1].rotation.x = curl * 1.1;
+            f.chain[2].rotation.x = curl * 1.3;
+        });
+
+        let thumbCurl = (Math.sin(time * 1.4 + 2.0) * 0.5 + 0.5) * 0.7 + 0.1;
+        thumb[0].rotation.y = -0.6 + Math.sin(time * 1.1) * 0.3;
+        thumb[0].rotation.z = Math.cos(time * 1.3) * 0.2;
+        thumb[1].rotation.x = thumbCurl;
+        thumb[2].rotation.x = thumbCurl * 1.2;
+
+        wrist.update(null);
+
+        // Update particle positions
+        const posAttr = geometry.attributes.position.array;
+        let idx = 0;
+        for (let i = 0; i < particleCount; i++) {
+            let p = particleData[i];
+            tempVec.copy(p.localOffset);
+            tempVec.applyMatrix4(p.node.worldMatrix);
+            posAttr[idx++] = tempVec.x;
+            posAttr[idx++] = tempVec.y;
+            posAttr[idx++] = tempVec.z;
+        }
+        geometry.attributes.position.needsUpdate = true;
+
+        // Mouse parallax + rotation
+        sceneGroup.rotation.y += (targetRotY - sceneGroup.rotation.y) * 0.05;
+        sceneGroup.rotation.x += (targetRotX - sceneGroup.rotation.x) * 0.05;
+        sceneGroup.rotation.z += (Math.sin(time * 0.2) * 0.1 - sceneGroup.rotation.z) * 0.05;
+        sceneGroup.position.x += (targetPosX - sceneGroup.position.x) * 0.05;
+        sceneGroup.position.y += (targetPosY - sceneGroup.position.y) * 0.05;
+        sceneGroup.position.z += (targetPosZ - sceneGroup.position.z) * 0.05;
+
+        renderer.render(scene, camera);
+    }
+
+    // --- RESPONSIVE RESIZE ---
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    animate();
 })();
 
 // ── SCROLL REVEAL ──
