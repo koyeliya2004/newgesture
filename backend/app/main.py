@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -19,14 +19,13 @@ SESSIONS_FILE = DATA_DIR / "sessions.json"
 
 app = FastAPI(
     title="Air Drawing API",
-    version="1.0.0",
-    description="Backend for Air Drawing Studio",
+    version="2.0.0",
+    description="Backend for Air Drawing Studio — Phase 2 Collab",
 )
 
-# Regex patterns that are always allowed
 ALLOWED_ORIGIN_PATTERNS = [
-    re.compile(r"^https://newgesture.*\.vercel\.app$"),       # all vercel previews
-    re.compile(r"^https://.*\.vercel\.app$"),                  # any vercel app
+    re.compile(r"^https://newgesture.*\.vercel\.app$"),
+    re.compile(r"^https://.*\.vercel\.app$"),
     re.compile(r"^http://localhost(:\d+)?$"),
     re.compile(r"^http://127\.0\.0\.1(:\d+)?$"),
 ]
@@ -43,8 +42,6 @@ def is_allowed_origin(origin: str) -> bool:
     return any(p.match(origin) for p in ALLOWED_ORIGIN_PATTERNS)
 
 
-# Use allow_all_origins=True so FastAPI echoes back the Origin header
-# We guard via is_allowed_origin in a custom middleware below
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -53,6 +50,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# ─── Models ───────────────────────────────────────────────────────────────────
 
 class StrokePoint(BaseModel):
     x: float
@@ -74,6 +73,8 @@ class SessionIn(BaseModel):
 class SessionOut(SessionIn):
     id: str
 
+
+# ─── Solo WebSocket Manager (legacy) ──────────────────────────────────────────
 
 class ConnectionManager:
     def __init__(self) -> None:
@@ -101,6 +102,124 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
+# ─── Room Manager (Phase 2) ────────────────────────────────────────────────────
+
+class RoomManager:
+    """
+    Manages collaborative rooms.
+    Each room holds up to 2 WebSocket connections.
+    Relays strokes + WebRTC signalling between peers.
+    """
+
+    def __init__(self) -> None:
+        # room_id -> list of (ws, user_id)
+        self.rooms: dict[str, list[dict[str, Any]]] = {}
+        # room_id -> list of strokes drawn so far (for late-joiner sync)
+        self.room_strokes: dict[str, list[dict[str, Any]]] = {}
+
+    def create_room(self) -> str:
+        room_id = uuid.uuid4().hex[:8]
+        self.rooms[room_id] = []
+        self.room_strokes[room_id] = []
+        return room_id
+
+    def room_exists(self, room_id: str) -> bool:
+        return room_id in self.rooms
+
+    def room_full(self, room_id: str) -> bool:
+        return len(self.rooms.get(room_id, [])) >= 2
+
+    async def join(self, room_id: str, ws: WebSocket, user_id: str) -> bool:
+        """Returns True if joined successfully."""
+        await ws.accept()
+        if not self.room_exists(room_id):
+            await ws.send_json({"type": "error", "message": "Room not found"})
+            return False
+        if self.room_full(room_id):
+            await ws.send_json({"type": "error", "message": "Room is full (max 2 users)"})
+            return False
+
+        self.rooms[room_id].append({"ws": ws, "user_id": user_id})
+        peer_count = len(self.rooms[room_id])
+
+        # Tell joiner their role + existing strokes for sync
+        await ws.send_json({
+            "type": "joined",
+            "room_id": room_id,
+            "user_id": user_id,
+            "role": "host" if peer_count == 1 else "guest",
+            "peer_count": peer_count,
+            "strokes": self.room_strokes[room_id],
+        })
+
+        # Notify existing peer that someone joined
+        if peer_count == 2:
+            other = self.rooms[room_id][0]
+            await other["ws"].send_json({
+                "type": "peer_joined",
+                "peer_id": user_id,
+            })
+
+        return True
+
+    def leave(self, room_id: str, ws: WebSocket) -> str | None:
+        """Remove ws from room, return user_id of leaver."""
+        if room_id not in self.rooms:
+            return None
+        leaver_id = None
+        self.rooms[room_id] = [
+            p for p in self.rooms[room_id] if p["ws"] != ws
+        ]
+        # cleanup empty rooms
+        if not self.rooms[room_id]:
+            del self.rooms[room_id]
+            self.room_strokes.pop(room_id, None)
+        return leaver_id
+
+    async def relay(self, room_id: str, sender_ws: WebSocket, message: dict[str, Any]) -> None:
+        """Send message to everyone in the room EXCEPT the sender."""
+        if room_id not in self.rooms:
+            return
+        dead = []
+        for peer in self.rooms[room_id]:
+            if peer["ws"] is sender_ws:
+                continue
+            try:
+                await peer["ws"].send_json(message)
+            except Exception:
+                dead.append(peer)
+        for p in dead:
+            self.rooms[room_id].remove(p)
+
+    async def broadcast_room(self, room_id: str, message: dict[str, Any]) -> None:
+        """Send message to ALL peers in the room."""
+        if room_id not in self.rooms:
+            return
+        dead = []
+        for peer in self.rooms[room_id]:
+            try:
+                await peer["ws"].send_json(message)
+            except Exception:
+                dead.append(peer)
+        for p in dead:
+            self.rooms[room_id].remove(p)
+
+    def get_room_info(self, room_id: str) -> dict[str, Any]:
+        if room_id not in self.rooms:
+            return {"exists": False}
+        return {
+            "exists": True,
+            "room_id": room_id,
+            "peer_count": len(self.rooms[room_id]),
+            "full": self.room_full(room_id),
+        }
+
+
+room_manager = RoomManager()
+
+
+# ─── Helpers ──────────────────────────────────────────────────────────────────
+
 def read_sessions() -> list[dict[str, Any]]:
     if not SESSIONS_FILE.exists():
         return []
@@ -116,14 +235,31 @@ def write_sessions(items: list[dict[str, Any]]) -> None:
     )
 
 
+# ─── REST Endpoints ────────────────────────────────────────────────────────────
+
 @app.get("/")
 def root() -> dict[str, str]:
-    return {"message": "Air Drawing API running 🎨", "docs": "/docs"}
+    return {"message": "Air Drawing API v2 running 🎨", "docs": "/docs"}
 
 
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "time": datetime.utcnow().isoformat()}
+
+
+@app.post("/api/rooms")
+def create_room() -> JSONResponse:
+    """Create a new collaboration room and return its ID."""
+    room_id = room_manager.create_room()
+    return JSONResponse({"room_id": room_id}, status_code=201)
+
+
+@app.get("/api/rooms/{room_id}")
+def get_room(room_id: str) -> JSONResponse:
+    info = room_manager.get_room_info(room_id)
+    if not info["exists"]:
+        return JSONResponse({"error": "Room not found"}, status_code=404)
+    return JSONResponse(info)
 
 
 @app.get("/api/sessions")
@@ -164,16 +300,16 @@ async def delete_session(session_id: str) -> JSONResponse:
     return JSONResponse({"deleted": session_id})
 
 
+# ─── Legacy Solo WebSocket ─────────────────────────────────────────────────────
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket) -> None:
     await manager.connect(websocket)
-    await websocket.send_json(
-        {
-            "type": "welcome",
-            "message": "Connected to Air Drawing WebSocket",
-            "time": datetime.utcnow().isoformat(),
-        }
-    )
+    await websocket.send_json({
+        "type": "welcome",
+        "message": "Connected to Air Drawing WebSocket",
+        "time": datetime.utcnow().isoformat(),
+    })
     try:
         while True:
             data = await websocket.receive_json()
@@ -188,3 +324,67 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                 )
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+
+
+# ─── Collaborative Room WebSocket ─────────────────────────────────────────────
+
+@app.websocket("/ws/room/{room_id}")
+async def room_websocket(websocket: WebSocket, room_id: str) -> None:
+    """
+    Collaborative room WebSocket.
+    Handles:
+      - stroke relay (draw events)
+      - WebRTC signalling (offer / answer / ice-candidate)
+      - clear canvas
+      - undo
+      - cursor position
+    """
+    user_id = uuid.uuid4().hex[:6]
+    joined = await room_manager.join(room_id, websocket, user_id)
+    if not joined:
+        return
+
+    try:
+        while True:
+            data = await websocket.receive_json()
+            msg_type = data.get("type", "")
+
+            # ── Drawing events ──────────────────────────────────────
+            if msg_type == "stroke":
+                # Save stroke for late-joiner sync
+                if room_id in room_manager.room_strokes:
+                    room_manager.room_strokes[room_id].append(data.get("stroke", {}))
+                data["sender"] = user_id
+                await room_manager.relay(room_id, websocket, data)
+
+            elif msg_type == "clear":
+                if room_id in room_manager.room_strokes:
+                    room_manager.room_strokes[room_id] = []
+                data["sender"] = user_id
+                await room_manager.relay(room_id, websocket, data)
+
+            elif msg_type == "undo":
+                if room_id in room_manager.room_strokes and room_manager.room_strokes[room_id]:
+                    room_manager.room_strokes[room_id].pop()
+                data["sender"] = user_id
+                await room_manager.relay(room_id, websocket, data)
+
+            elif msg_type == "cursor":
+                data["sender"] = user_id
+                await room_manager.relay(room_id, websocket, data)
+
+            # ── WebRTC signalling ───────────────────────────────────
+            elif msg_type in ("offer", "answer", "ice-candidate"):
+                data["sender"] = user_id
+                await room_manager.relay(room_id, websocket, data)
+
+            # ── Ping ────────────────────────────────────────────────
+            elif msg_type == "ping":
+                await websocket.send_json({"type": "pong", "time": datetime.utcnow().isoformat()})
+
+    except WebSocketDisconnect:
+        room_manager.leave(room_id, websocket)
+        await room_manager.broadcast_room(room_id, {
+            "type": "peer_left",
+            "peer_id": user_id,
+        })
