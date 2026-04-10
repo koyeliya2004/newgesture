@@ -2,14 +2,34 @@
   "version": 2,
   "builds": [
     {
-      "src": "frontend/index.html",
+      "src": "frontend/**",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
+      "src": "/app",
+      "dest": "/frontend/app.html"
+    },
+    {
+      "src": "/app.html",
+      "dest": "/frontend/app.html"
+    },
+    {
+      "src": "/history",
+      "dest": "/frontend/history.html"
+    },
+    {
+      "src": "/history.html",
+      "dest": "/frontend/history.html"
+    },
+    {
+      "src": "/",
+      "dest": "/frontend/index.html"
+    },
+    {
       "src": "/(.*)",
-      "dest": "frontend/index.html"
+      "dest": "/frontend/$1"
     }
   ]
 }
