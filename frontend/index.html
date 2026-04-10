@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Air Drawing Studio — Draw with Your Hands</title>
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+  <!-- Import Three.js for 3D skeletal hand background -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     :root {
       --bg: #05050f;
@@ -33,6 +35,15 @@
       position: fixed; inset: 0;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
       pointer-events: none; z-index: 0;
+    }
+
+    /* ── 3D SKELETAL HAND CANVAS — HERO ONLY ── */
+    #skeletal-bg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
     }
 
     /* ── NAV ── */
@@ -81,6 +92,7 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       text-align: center; padding: 120px clamp(20px,5vw,80px) 80px;
       position: relative; overflow: hidden;
+      background: radial-gradient(circle at center, #0a1118 0%, #000000 100%);
     }
     /* Glow orbs */
     .hero::after {
@@ -90,10 +102,12 @@
       background: radial-gradient(circle, rgba(139,92,246,.18) 0%, transparent 70%);
       top: 50%; left: 50%; transform: translate(-50%,-50%);
       pointer-events: none;
+      z-index: 1;
     }
     .orb {
       position: absolute; border-radius: 50%; pointer-events: none; filter: blur(80px);
       animation: orbFloat 8s ease-in-out infinite;
+      z-index: 1;
     }
     .orb1 { width:500px;height:500px; background:rgba(139,92,246,.12); top:-100px;left:-100px; animation-delay:0s; }
     .orb2 { width:400px;height:400px; background:rgba(52,211,153,.1); bottom:-80px;right:-80px; animation-delay:-3s; }
@@ -102,6 +116,10 @@
       0%,100% { transform: translateY(0) scale(1); }
       50% { transform: translateY(-30px) scale(1.05); }
     }
+
+    /* All hero content sits above the 3D canvas */
+    .hero > *:not(#skeletal-bg) { position: relative; z-index: 2; }
+
     .hero-badge {
       display: inline-flex; align-items: center; gap: 8px;
       background: rgba(139,92,246,.15); border: 1px solid rgba(139,92,246,.3);
@@ -319,7 +337,7 @@
     .reveal { opacity: 0; transform: translateY(32px); transition: opacity .7s ease, transform .7s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
 
-    /* ── FLOATING PARTICLES ── */
+    /* ── OLD FLOATING PARTICLES (non-hero pages) ── */
     #particles { position:fixed;inset:0;pointer-events:none;z-index:0; }
 
     @media(max-width:600px){
@@ -330,6 +348,7 @@
 </head>
 <body>
 
+<!-- Old 2D particle canvas kept for non-hero sections (very subtle) -->
 <canvas id="particles"></canvas>
 
 <!-- NAV -->
@@ -347,8 +366,11 @@
   </div>
 </nav>
 
-<!-- HERO -->
+<!-- HERO with 3D Skeletal Hand Background -->
 <section class="hero">
+  <!-- 3D Three.js canvas lives INSIDE the hero only -->
+  <div id="skeletal-bg"></div>
+
   <div class="orb orb1"></div>
   <div class="orb orb2"></div>
   <div class="orb orb3"></div>
@@ -527,7 +549,327 @@
 </footer>
 
 <script>
-// ── Floating particles background
+// ═══════════════════════════════════════════════════════
+// 3D SKELETAL HAND PARTICLE BACKGROUND — HERO ONLY
+// ═══════════════════════════════════════════════════════
+(function() {
+  const container = document.getElementById('skeletal-bg');
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x050a10, 0.03);
+
+  const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+  camera.position.z = 13;
+  camera.position.y = 2;
+
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  container.appendChild(renderer.domElement);
+
+  // --- BACKGROUND SMALL WAVE PARTICLES ---
+  const bgParticleCount = 5000;
+  const bgGeometry = new THREE.BufferGeometry();
+  const bgPositions = new Float32Array(bgParticleCount * 3);
+  const bgInitialY = new Float32Array(bgParticleCount);
+
+  for (let i = 0; i < bgParticleCount; i++) {
+    bgPositions[i * 3]     = (Math.random() - 0.5) * 150;
+    bgPositions[i * 3 + 1] = (Math.random() - 0.5) * 80;
+    bgPositions[i * 3 + 2] = (Math.random() - 0.5) * 50 - 40;
+    bgInitialY[i] = bgPositions[i * 3 + 1];
+  }
+
+  bgGeometry.setAttribute('position', new THREE.BufferAttribute(bgPositions, 3));
+  bgGeometry.setAttribute('initialY', new THREE.BufferAttribute(bgInitialY, 1));
+
+  const bgMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      time: { value: 0 },
+      color: { value: new THREE.Color(0x1166aa) }
+    },
+    vertexShader: `
+      uniform float time;
+      attribute float initialY;
+      void main() {
+        vec3 pos = position;
+        float waveX = sin(pos.x * 0.1 + time * 1.5) * 3.0;
+        float waveZ = cos(pos.z * 0.1 + time * 1.0) * 3.0;
+        pos.y = initialY + waveX + waveZ;
+        vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+        gl_PointSize = (6.0 / -mvPosition.z);
+        gl_Position = projectionMatrix * mvPosition;
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 color;
+      void main() {
+        vec2 coord = gl_PointCoord - vec2(0.5);
+        float dist = length(coord);
+        if (dist > 0.5) discard;
+        float alpha = smoothstep(0.5, 0.1, dist) * 0.6;
+        gl_FragColor = vec4(color, alpha);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending
+  });
+
+  const bgParticleMesh = new THREE.Points(bgGeometry, bgMaterial);
+  scene.add(bgParticleMesh);
+
+  // --- BONE NODE CLASS ---
+  class BoneNode {
+    constructor(localPos) {
+      this.localPos = localPos;
+      this.rotation = new THREE.Euler();
+      this.children = [];
+      this.worldPos = new THREE.Vector3();
+      this.worldMatrix = new THREE.Matrix4();
+    }
+    update(parentMatrix) {
+      const localMat = new THREE.Matrix4().makeTranslation(this.localPos.x, this.localPos.y, this.localPos.z);
+      const rotMat = new THREE.Matrix4().makeRotationFromEuler(this.rotation);
+      localMat.multiply(rotMat);
+      if (parentMatrix) {
+        this.worldMatrix.multiplyMatrices(parentMatrix, localMat);
+      } else {
+        this.worldMatrix.copy(localMat);
+      }
+      this.worldPos.setFromMatrixPosition(this.worldMatrix);
+      for (let child of this.children) child.update(this.worldMatrix);
+    }
+  }
+
+  function createFinger(parent, baseOffset, lengths, baseRot) {
+    let base = new BoneNode(baseOffset);
+    base.rotation.copy(baseRot);
+    parent.children.push(base);
+    let nodes = [base];
+    let current = base;
+    for (let len of lengths) {
+      let next = new BoneNode(new THREE.Vector3(0, len, 0));
+      current.children.push(next);
+      nodes.push(next);
+      current = next;
+    }
+    return nodes;
+  }
+
+  // --- BUILD HAND ---
+  const wrist = new BoneNode(new THREE.Vector3(0, -5, 0));
+  const thumb  = createFinger(wrist, new THREE.Vector3(-2.0, 1.0, 1.5), [1.8, 1.2], new THREE.Euler(0.5, -0.6, 0.8));
+  const index  = createFinger(wrist, new THREE.Vector3(-1.5, 3.5, 0),  [2.2, 1.5, 1.0], new THREE.Euler(0, 0,  0.15));
+  const middle = createFinger(wrist, new THREE.Vector3(0,   4.0, 0),   [2.6, 1.8, 1.2], new THREE.Euler(0, 0,  0));
+  const ring   = createFinger(wrist, new THREE.Vector3(1.5, 3.8, 0),   [2.4, 1.6, 1.1], new THREE.Euler(0, 0, -0.15));
+  const pinky  = createFinger(wrist, new THREE.Vector3(2.8, 2.8, 0),   [1.8, 1.3, 0.9], new THREE.Euler(0, 0, -0.3));
+  wrist.update(null);
+
+  // --- GENERATE PARTICLES ---
+  const particleData = [];
+
+  function generateParticles(node, parentNode) {
+    const numJointParticles = 350;
+    for (let i = 0; i < numJointParticles; i++) {
+      let theta = Math.random() * Math.PI * 2;
+      let phi   = Math.acos((Math.random() * 2) - 1);
+      let r     = Math.random() * 0.4;
+      particleData.push({
+        node,
+        localOffset: new THREE.Vector3(
+          r * Math.sin(phi) * Math.cos(theta),
+          r * Math.sin(phi) * Math.sin(theta),
+          r * Math.cos(phi)
+        ),
+        color: new THREE.Color().setHSL(0.8 + Math.random() * 0.15, 1.0, 0.6)
+      });
+    }
+
+    if (parentNode) {
+      let boneLength  = node.localPos.length();
+      let isPalm      = (parentNode === wrist);
+      let density     = isPalm ? 700 : 400;
+      let numBone     = Math.floor(boneLength * density);
+      let boneThick   = isPalm ? 0.6 : 0.25;
+
+      for (let i = 0; i < numBone; i++) {
+        let t     = Math.random();
+        let r     = Math.random() * boneThick;
+        let theta = Math.random() * Math.PI * 2;
+        let lx    = r * Math.cos(theta);
+        let lz    = r * Math.sin(theta);
+        particleData.push({
+          node: parentNode,
+          localOffset: new THREE.Vector3(lx, 0, lz).add(node.localPos.clone().multiplyScalar(t)),
+          color: new THREE.Color().setHSL(0.5 + Math.random() * 0.1, 1.0, 0.5)
+        });
+        if (Math.random() > 0.7) {
+          let ir  = Math.random() * boneThick * 0.15;
+          particleData.push({
+            node: parentNode,
+            localOffset: new THREE.Vector3(ir * Math.cos(theta), 0, ir * Math.sin(theta)).add(node.localPos.clone().multiplyScalar(t)),
+            color: new THREE.Color(0xffffff)
+          });
+        }
+      }
+    }
+
+    for (let child of node.children) generateParticles(child, node);
+  }
+
+  generateParticles(wrist, null);
+
+  // --- BUFFER GEOMETRY ---
+  const particleCount = particleData.length;
+  const geometry = new THREE.BufferGeometry();
+  const positions = new Float32Array(particleCount * 3);
+  const colors    = new Float32Array(particleCount * 3);
+
+  for (let i = 0; i < particleCount; i++) {
+    colors[i*3]   = particleData[i].color.r;
+    colors[i*3+1] = particleData[i].color.g;
+    colors[i*3+2] = particleData[i].color.b;
+  }
+
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
+
+  const shaderMaterial = new THREE.ShaderMaterial({
+    uniforms: { time: { value: 0 } },
+    vertexShader: `
+      attribute vec3 color;
+      varying vec3 vColor;
+      uniform float time;
+      void main() {
+        vColor = color;
+        vec3 pos = position;
+        float pulse = sin(time * 5.0 + position.y * 10.0 + position.z * 10.0) * 0.03;
+        pos.x += pulse;
+        pos.y += pulse;
+        vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+        float sizeBase = 22.0 + sin(time * 3.0 + position.x * 5.0) * 8.0;
+        gl_PointSize = (sizeBase / -mvPosition.z);
+        gl_Position = projectionMatrix * mvPosition;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vColor;
+      void main() {
+        vec2 coord = gl_PointCoord - vec2(0.5);
+        float dist = length(coord);
+        if (dist > 0.5) discard;
+        float alpha = smoothstep(0.5, 0.1, dist);
+        gl_FragColor = vec4(vColor, alpha * 0.9 + 0.1);
+      }
+    `,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    transparent: true
+  });
+
+  const particleMesh = new THREE.Points(geometry, shaderMaterial);
+  const sceneGroup = new THREE.Group();
+  sceneGroup.add(particleMesh);
+  scene.add(sceneGroup);
+
+  // --- INTERACTION ---
+  let mouseX = 0, mouseY = 0;
+  let targetRotX = 0, targetRotY = 0;
+  let targetPosX = 0, targetPosY = 0, targetPosZ = 0;
+
+  function updateTarget(clientX, clientY) {
+    mouseX = (clientX / window.innerWidth) * 2 - 1;
+    mouseY = -(clientY / window.innerHeight) * 2 + 1;
+    targetRotY = mouseX * 1.2;
+    targetRotX = mouseY * 0.8;
+    targetPosX = mouseX * 1.5;
+    targetPosY = mouseY * 1.5;
+    let dist = Math.sqrt(mouseX*mouseX + mouseY*mouseY);
+    targetPosZ = dist * 5.0;
+  }
+
+  document.addEventListener('mousemove', e => updateTarget(e.clientX, e.clientY));
+  document.addEventListener('touchstart', e => { if(e.touches.length>0) updateTarget(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+  document.addEventListener('touchmove',  e => { if(e.touches.length>0) updateTarget(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+
+  const clock = new THREE.Clock();
+  const tempVec = new THREE.Vector3();
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const time = clock.getElapsedTime();
+
+    shaderMaterial.uniforms.time.value = time;
+    bgMaterial.uniforms.time.value     = time;
+
+    // Finger animation
+    wrist.localPos.y  = -5 + Math.sin(time * 0.8) * 0.8;
+    wrist.rotation.z  = Math.sin(time * 0.5) * 0.1;
+
+    const fingersPhase = [
+      { chain: index,  phase: 0.0, speed: 1.2 },
+      { chain: middle, phase: 0.8, speed: 1.5 },
+      { chain: ring,   phase: 1.6, speed: 1.3 },
+      { chain: pinky,  phase: 2.4, speed: 1.6 }
+    ];
+    fingersPhase.forEach(f => {
+      let curl   = (Math.sin(time * f.speed + f.phase) * 0.5 + 0.5) * 0.8 + 0.05;
+      let spread = Math.sin(time * f.speed * 0.5 + f.phase) * 0.15;
+      f.chain[0].rotation.x = curl * 0.3;
+      f.chain[0].rotation.z = spread;
+      f.chain[1].rotation.x = curl * 1.1;
+      f.chain[2].rotation.x = curl * 1.3;
+    });
+    let thumbCurl = (Math.sin(time * 1.4 + 2.0) * 0.5 + 0.5) * 0.7 + 0.1;
+    thumb[0].rotation.y = -0.6 + Math.sin(time * 1.1) * 0.3;
+    thumb[0].rotation.z = Math.cos(time * 1.3) * 0.2;
+    thumb[1].rotation.x = thumbCurl;
+    thumb[2].rotation.x = thumbCurl * 1.2;
+
+    wrist.update(null);
+
+    // Update particle positions
+    const posAttr = geometry.attributes.position.array;
+    let idx = 0;
+    for (let i = 0; i < particleCount; i++) {
+      let p = particleData[i];
+      tempVec.copy(p.localOffset);
+      tempVec.applyMatrix4(p.node.worldMatrix);
+      posAttr[idx++] = tempVec.x;
+      posAttr[idx++] = tempVec.y;
+      posAttr[idx++] = tempVec.z;
+    }
+    geometry.attributes.position.needsUpdate = true;
+
+    // Mouse parallax
+    sceneGroup.rotation.y += (targetRotY - sceneGroup.rotation.y) * 0.05;
+    sceneGroup.rotation.x += (targetRotX - sceneGroup.rotation.x) * 0.05;
+    sceneGroup.rotation.z += (Math.sin(time * 0.2) * 0.1 - sceneGroup.rotation.z) * 0.05;
+    sceneGroup.position.x += (targetPosX - sceneGroup.position.x) * 0.05;
+    sceneGroup.position.y += (targetPosY - sceneGroup.position.y) * 0.05;
+    sceneGroup.position.z += (targetPosZ - sceneGroup.position.z) * 0.05;
+
+    renderer.render(scene, camera);
+  }
+
+  // Resize handler for hero canvas
+  function resizeSkeletal() {
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  }
+  window.addEventListener('resize', resizeSkeletal);
+
+  animate();
+})();
+
+
+// ═══════════════════════════════════════════════════════
+// OLD 2D FLOATING PARTICLES (non-hero subtle bg)
+// ═══════════════════════════════════════════════════════
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 let W, H, particles = [];
