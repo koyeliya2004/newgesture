@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AirDraw — My Saved Art</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#05050f;--surface:#0e0e1c;--surface2:#161628;--border:#1e1e35;
+      --text:#ececf6;--muted:#7c7ea8;
+      --primary:#8b5cf6;--primary2:#6d28d9;
+      --accent:#34d399;--pink:#f472b6;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth;}
+    body{font-family:'Satoshi',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+    /* NAV */
+    nav{
+      position:sticky;top:0;z-index:50;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 clamp(16px,4vw,60px);height:60px;
+      background:rgba(5,5,15,.88);backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-left{display:flex;align-items:center;gap:12px;}
+    .back-link{
+      display:flex;align-items:center;gap:6px;
+      color:var(--muted);text-decoration:none;font-size:.83rem;
+      padding:5px 12px;border:1px solid var(--border);border-radius:8px;
+      transition:all .2s;
+    }
+    .back-link:hover{color:var(--text);border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.05);}
+    .brand{
+      font-weight:900;font-size:1rem;letter-spacing:-.03em;
+      background:linear-gradient(135deg,#a78bfa,#34d399);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .nav-right{display:flex;align-items:center;gap:8px;}
+    .nav-btn{
+      background:linear-gradient(135deg,var(--primary),var(--primary2));
+      color:#fff;text-decoration:none;font-size:.82rem;font-weight:700;
+      padding:7px 18px;border-radius:999px;
+      box-shadow:0 0 18px rgba(139,92,246,.35);
+      transition:all .2s;
+    }
+    .nav-btn:hover{transform:translateY(-1px);box-shadow:0 0 28px rgba(139,92,246,.6);}
+
+    /* HERO */
+    .hero{
+      text-align:center;padding:70px clamp(16px,4vw,60px) 50px;
+      position:relative;overflow:hidden;
+    }
+    .hero::before{
+      content:'';
+      position:absolute;width:700px;height:500px;border-radius:50%;
+      background:radial-gradient(circle,rgba(139,92,246,.13),transparent 70%);
+      top:50%;left:50%;transform:translate(-50%,-50%);
+      pointer-events:none;
+    }
+    .hero-tag{
+      display:inline-flex;align-items:center;gap:7px;
+      background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.25);
+      color:#a78bfa;font-size:.78rem;font-weight:600;
+      padding:5px 14px;border-radius:999px;margin-bottom:20px;
+      animation:fadeUp .5s ease both;
+    }
+    .hero-tag-dot{width:6px;height:6px;border-radius:50%;background:#a78bfa;animation:blink 1.5s infinite;}
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+    .hero h1{
+      font-size:clamp(2rem,5vw,3.8rem);font-weight:900;letter-spacing:-.04em;
+      margin-bottom:14px;animation:fadeUp .5s .1s ease both;
+    }
+    .hero h1 span{
+      background:linear-gradient(135deg,#a78bfa,#34d399,#f472b6);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .hero p{color:var(--muted);font-size:1rem;animation:fadeUp .5s .2s ease both;}
+    .hero-stats{
+      display:flex;justify-content:center;gap:32px;margin-top:32px;
+      animation:fadeUp .5s .3s ease both;
+      flex-wrap:wrap;
+    }
+    .hstat{text-align:center;}
+    .hstat-num{
+      font-size:2rem;font-weight:900;letter-spacing:-.04em;
+      background:linear-gradient(135deg,var(--primary),var(--accent));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .hstat-label{color:var(--muted);font-size:.8rem;margin-top:2px;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+    /* FILTERS */
+    .filters{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 clamp(16px,4vw,60px) 24px;
+      gap:12px;flex-wrap:wrap;
+    }
+    .search-box{
+      display:flex;align-items:center;gap:8px;
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:10px;padding:8px 14px;
+      transition:border-color .2s;
+      flex:1;max-width:320px;
+    }
+    .search-box:focus-within{border-color:var(--primary);}
+    .search-box input{
+      background:none;border:none;outline:none;
+      color:var(--text);font-family:'Satoshi',sans-serif;font-size:.88rem;
+      width:100%;min-width:0;
+    }
+    .search-box input::placeholder{color:var(--muted);}
+    .sort-select{
+      background:var(--surface);border:1px solid var(--border);
+      color:var(--text);font-family:'Satoshi',sans-serif;font-size:.83rem;
+      padding:8px 12px;border-radius:10px;cursor:pointer;
+      outline:none;transition:border-color .2s;
+    }
+    .sort-select:focus{border-color:var(--primary);}
+    .filter-right{display:flex;gap:8px;align-items:center;}
+    .refresh-btn{
+      background:var(--surface);border:1px solid var(--border);
+      color:var(--muted);padding:8px 14px;border-radius:10px;
+      cursor:pointer;font-size:.82rem;font-family:'Satoshi',sans-serif;
+      transition:all .2s;
+    }
+    .refresh-btn:hover{border-color:var(--primary);color:var(--text);}
+
+    /* GRID */
+    .grid-wrap{padding:0 clamp(16px,4vw,60px) 80px;}
+    .sessions-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+      gap:20px;
+    }
+
+    /* SESSION CARD */
+    .session-card{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:20px;overflow:hidden;
+      transition:all .3s;animation:cardIn .4s ease both;
+      position:relative;
+    }
+    .session-card:hover{border-color:rgba(139,92,246,.4);transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,.45);}
+    @keyframes cardIn{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
+    .card-preview{
+      width:100%;height:180px;background:var(--surface2);
+      display:flex;align-items:center;justify-content:center;
+      position:relative;overflow:hidden;
+    }
+    .card-preview canvas{display:block;}
+    .card-preview .no-preview{color:var(--muted);font-size:.85rem;text-align:center;}
+    .card-stroke-count{
+      position:absolute;top:10px;right:10px;
+      background:rgba(5,5,15,.8);backdrop-filter:blur(8px);
+      border:1px solid var(--border);border-radius:999px;
+      font-size:.7rem;color:var(--muted);padding:3px 9px;
+    }
+
+    .card-body{padding:16px;}
+    .card-name{
+      font-weight:700;font-size:.95rem;margin-bottom:4px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .card-meta{color:var(--muted);font-size:.78rem;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;}
+    .card-actions{display:flex;gap:8px;}
+    .card-btn{
+      flex:1;background:var(--surface2);border:1px solid var(--border);
+      color:var(--text);padding:7px;border-radius:10px;
+      cursor:pointer;font-family:'Satoshi',sans-serif;font-size:.78rem;font-weight:600;
+      transition:all .2s;text-align:center;
+    }
+    .card-btn:hover{background:rgba(139,92,246,.15);border-color:var(--primary);}
+    .card-btn.del:hover{background:rgba(251,113,133,.12);border-color:#fb7185;color:#fb7185;}
+
+    /* EMPTY STATE */
+    .empty-state{
+      text-align:center;padding:80px 20px;
+      display:none;
+    }
+    .empty-state.show{display:block;}
+    .empty-icon{font-size:4rem;margin-bottom:20px;}
+    .empty-state h3{font-size:1.3rem;font-weight:700;margin-bottom:10px;}
+    .empty-state p{color:var(--muted);margin-bottom:28px;line-height:1.7;}
+    .empty-btn{
+      display:inline-flex;align-items:center;gap:8px;
+      background:linear-gradient(135deg,var(--primary),var(--primary2));
+      color:#fff;text-decoration:none;font-weight:700;
+      padding:12px 28px;border-radius:999px;
+      box-shadow:0 0 24px rgba(139,92,246,.4);
+      transition:all .2s;
+    }
+    .empty-btn:hover{transform:translateY(-2px);box-shadow:0 0 36px rgba(139,92,246,.6);}
+
+    /* LOADING */
+    .loading-wrap{text-align:center;padding:80px 20px;}
+    .spinner{
+      width:40px;height:40px;border-radius:50%;
+      border:3px solid var(--border);
+      border-top-color:var(--primary);
+      animation:spin .8s linear infinite;
+      margin:0 auto 20px;
+    }
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .loading-wrap p{color:var(--muted);font-size:.9rem;}
+
+    /* ERROR */
+    .error-banner{
+      display:none;text-align:center;padding:40px 20px;
+    }
+    .error-banner.show{display:block;}
+    .error-banner p{color:#fb7185;margin-bottom:16px;}
+
+    /* TOAST */
+    .toast{
+      position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(16px);
+      background:var(--surface2);border:1px solid var(--border);border-radius:999px;
+      padding:8px 22px;font-size:.82rem;color:var(--text);
+      z-index:90;opacity:0;transition:all .3s;pointer-events:none;
+      white-space:nowrap;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+    .toast.error{border-color:#fb7185;color:#fb7185;}
+    .toast.success{border-color:#34d399;color:#34d399;}
+
+    /* MODAL */
+    .modal-bg{
+      position:fixed;inset:0;background:rgba(0,0,0,.7);
+      backdrop-filter:blur(8px);z-index:100;
+      display:none;align-items:center;justify-content:center;
+    }
+    .modal-bg.open{display:flex;}
+    .modal{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:20px;padding:28px;max-width:480px;width:90%;
+      animation:fadeUp .3s ease;
+    }
+    .modal h3{font-size:1.1rem;font-weight:700;margin-bottom:10px;}
+    .modal p{color:var(--muted);font-size:.88rem;line-height:1.6;margin-bottom:20px;}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+    .modal-btn{
+      padding:8px 20px;border-radius:10px;font-family:'Satoshi',sans-serif;
+      font-size:.85rem;font-weight:600;cursor:pointer;border:1px solid var(--border);
+      transition:all .2s;
+    }
+    .modal-btn.cancel{background:var(--surface2);color:var(--text);}
+    .modal-btn.cancel:hover{border-color:rgba(255,255,255,.2);}
+    .modal-btn.confirm{background:#fb7185;color:#fff;border-color:#fb7185;}
+    .modal-btn.confirm:hover{background:#f43f5e;}
+
+    /* FOOTER */
+    footer{
+      background:var(--surface);border-top:1px solid var(--border);
+      padding:28px clamp(16px,4vw,60px);
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+    }
+    .footer-copy{color:var(--muted);font-size:.82rem;}
+    .footer-links{display:flex;gap:16px;}
+    .footer-links a{color:var(--muted);text-decoration:none;font-size:.82rem;transition:color .2s;}
+    .footer-links a:hover{color:var(--text);}
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <a href="/" class="back-link">← Home</a>
+    <div class="brand">AirDraw History</div>
+  </div>
+  <div class="nav-right">
+    <a href="/app.html" class="nav-btn">🎨 Open Studio</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag"><div class="hero-tag-dot"></div>Your Saved Artwork</div>
+  <h1>My Drawing <span>History</span></h1>
+  <p>All your saved sessions from Air Drawing Studio</p>
+  <div class="hero-stats">
+    <div class="hstat"><div class="hstat-num" id="totalSessions">—</div><div class="hstat-label">Sessions</div></div>
+    <div class="hstat"><div class="hstat-num" id="totalStrokes">—</div><div class="hstat-label">Total Strokes</div></div>
+    <div class="hstat"><div class="hstat-num" id="totalPoints">—</div><div class="hstat-label">Total Points</div></div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <div class="search-box">
+    <span style="color:var(--muted)">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search sessions…">
+  </div>
+  <div class="filter-right">
+    <select class="sort-select" id="sortSelect">
+      <option value="newest">Newest First</option>
+      <option value="oldest">Oldest First</option>
+      <option value="strokes">Most Strokes</option>
+    </select>
+    <button class="refresh-btn" id="refreshBtn">↻ Refresh</button>
+  </div>
+</div>
+
+<!-- GRID -->
+<div class="grid-wrap">
+  <div class="loading-wrap" id="loadingWrap">
+    <div class="spinner"></div>
+    <p>Loading your saved sessions…</p>
+  </div>
+  <div class="error-banner" id="errorBanner">
+    <p id="errorMsg">⚠️ Could not reach backend. Is it awake?</p>
+    <button class="refresh-btn" onclick="loadSessions()">Retry</button>
+  </div>
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">🎨</div>
+    <h3>No saved sessions yet</h3>
+    <p>Head to the drawing studio, create something amazing,<br>and hit Save Session to store it here.</p>
+    <a href="/app.html" class="empty-btn">🎨 Open Studio</a>
+  </div>
+  <div class="sessions-grid" id="sessionsGrid"></div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3>🗑️ Delete Session?</h3>
+    <p>This will permanently delete this drawing session. This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn confirm" id="confirmDelete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">Built with ❤️ by Koyeliya Ghosh</div>
+  <div class="footer-links">
+    <a href="/">Home</a>
+    <a href="/app.html">Studio</a>
+  </div>
+</footer>
+
+<script>
+const API_BASE = 'https://air-drawing-api.onrender.com';
+let allSessions = [];
+let deleteTargetId = null;
+
+// ── TOAST
+function showToast(msg, type='', ms=2800){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = 'toast', ms);
+}
+
+// ── DRAW MINI PREVIEW
+function drawPreview(session, canvas) {
+  const W = canvas.width  = canvas.offsetWidth  || 280;
+  const H = canvas.height = canvas.offsetHeight || 180;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0e0e1c';
+  ctx.fillRect(0, 0, W, H);
+  if (!session.strokes || !session.strokes.length) {
+    ctx.fillStyle = '#7c7ea8';
+    ctx.font = '13px Satoshi,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No strokes', W/2, H/2);
+    return;
+  }
+  // find bounding box of all points
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  session.strokes.forEach(s => s.points.forEach(p => {
+    minX=Math.min(minX,p.x); maxX=Math.max(maxX,p.x);
+    minY=Math.min(minY,p.y); maxY=Math.max(maxY,p.y);
+  }));
+  const pad = 16;
+  const scaleX = (W - pad*2) / (maxX - minX || 1);
+  const scaleY = (H - pad*2) / (maxY - minY || 1);
+  const scale  = Math.min(scaleX, scaleY);
+  const offX   = pad + ((W - pad*2) - (maxX-minX)*scale) / 2;
+  const offY   = pad + ((H - pad*2) - (maxY-minY)*scale) / 2;
+  session.strokes.forEach(st => {
+    if (!st.points || st.points.length < 2) return;
+    ctx.save();
+    ctx.strokeStyle = st.color || '#a78bfa';
+    ctx.lineWidth   = Math.max(1, (st.size || 4) * scale * 0.6);
+    ctx.lineCap     = 'round'; ctx.lineJoin = 'round';
+    ctx.globalAlpha = (st.opacity || 1) * 0.9;
+    ctx.shadowBlur  = 4; ctx.shadowColor = st.color || '#a78bfa';
+    ctx.beginPath();
+    const p0 = st.points[0];
+    ctx.moveTo(offX + (p0.x - minX)*scale, offY + (p0.y - minY)*scale);
+    for (let i = 1; i < st.points.length; i++) {
+      const p = st.points[i];
+      ctx.lineTo(offX + (p.x - minX)*scale, offY + (p.y - minY)*scale);
+    }
+    ctx.stroke();
+    ctx.restore();
+  });
+}
+
+// ── FORMAT DATE
+function fmtDate(iso) {
+  if (!iso) return 'Unknown date';
+  try {
+    return new Date(iso).toLocaleString('en-IN', {dateStyle:'medium', timeStyle:'short'});
+  } catch { return iso; }
+}
+
+// ── RENDER GRID
+function renderGrid(sessions) {
+  const grid  = document.getElementById('sessionsGrid');
+  const empty = document.getElementById('emptyState');
+  grid.innerHTML = '';
+  if (!sessions.length) { empty.classList.add('show'); return; }
+  empty.classList.remove('show');
+
+  sessions.forEach((s, i) => {
+    const totalPts = (s.strokes || []).reduce((a, st) => a + (st.points||[]).length, 0);
+    const card = document.createElement('div');
+    card.className = 'session-card';
+    card.style.animationDelay = (i * 0.05) + 's';
+    card.innerHTML = `
+      <div class="card-preview">
+        <canvas style="width:100%;height:180px"></canvas>
+        <div class="card-stroke-count">${(s.strokes||[]).length} strokes</div>
+      </div>
+      <div class="card-body">
+        <div class="card-name" title="${s.name || s.id}">${s.name || 'Unnamed Session'}</div>
+        <div class="card-meta">
+          <span>📅 ${fmtDate(s.created_at)}</span>
+          <span>✏️ ${totalPts} pts</span>
+        </div>
+        <div class="card-actions">
+          <button class="card-btn" data-action="download" data-id="${s.id}">⬇️ Download</button>
+          <button class="card-btn del" data-action="delete" data-id="${s.id}">🗑️ Delete</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+    // draw preview after DOM paint
+    requestAnimationFrame(() => {
+      const cv = card.querySelector('canvas');
+      drawPreview(s, cv);
+    });
+    // button events
+    card.querySelector('[data-action="download"]').addEventListener('click', () => downloadSession(s));
+    card.querySelector('[data-action="delete"]').addEventListener('click', () => openModal(s.id));
+  });
+}
+
+// ── UPDATE HERO STATS
+function updateStats(sessions) {
+  document.getElementById('totalSessions').textContent = sessions.length;
+  const strokes = sessions.reduce((a, s) => a + (s.strokes||[]).length, 0);
+  const points  = sessions.reduce((a, s) => a + (s.strokes||[]).reduce((b, st) => b + (st.points||[]).length, 0), 0);
+  document.getElementById('totalStrokes').textContent = strokes;
+  document.getElementById('totalPoints').textContent  = points > 999 ? (points/1000).toFixed(1)+'k' : points;
+}
+
+// ── LOAD SESSIONS
+async function loadSessions() {
+  const loading = document.getElementById('loadingWrap');
+  const errBanner = document.getElementById('errorBanner');
+  const grid = document.getElementById('sessionsGrid');
+  loading.style.display = 'block';
+  errBanner.classList.remove('show');
+  grid.innerHTML = '';
+  document.getElementById('emptyState').classList.remove('show');
+  try {
+    const res = await fetch(API_BASE + '/api/sessions', {signal: AbortSignal.timeout(12000)});
+    if (!res.ok) throw new Error('Server error ' + res.status);
+    allSessions = await res.json();
+    loading.style.display = 'none';
+    updateStats(allSessions);
+    applySortAndFilter();
+  } catch(err) {
+    loading.style.display = 'none';
+    document.getElementById('errorMsg').textContent = '⚠️ Could not reach backend: ' + err.message;
+    errBanner.classList.add('show');
+    showToast('Backend offline or waking up — try Refresh', 'error', 5000);
+  }
+}
+
+// ── SORT & FILTER
+function applySortAndFilter() {
+  const q     = document.getElementById('searchInput').value.toLowerCase();
+  const sort  = document.getElementById('sortSelect').value;
+  let list = allSessions.filter(s =>
+    (s.name||'').toLowerCase().includes(q) ||
+    (s.id||'').toLowerCase().includes(q)
+  );
+  if (sort === 'newest')  list.sort((a,b) => new Date(b.created_at||0) - new Date(a.created_at||0));
+  if (sort === 'oldest')  list.sort((a,b) => new Date(a.created_at||0) - new Date(b.created_at||0));
+  if (sort === 'strokes') list.sort((a,b) => (b.strokes||[]).length - (a.strokes||[]).length);
+  renderGrid(list);
+}
+
+document.getElementById('searchInput').addEventListener('input', applySortAndFilter);
+document.getElementById('sortSelect').addEventListener('change', applySortAndFilter);
+document.getElementById('refreshBtn').addEventListener('click', loadSessions);
+
+// ── DOWNLOAD SESSION AS PNG
+function downloadSession(session) {
+  const W = 1200, H = 800;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#05050f';
+  ctx.fillRect(0, 0, W, H);
+  if (session.strokes && session.strokes.length) {
+    let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+    session.strokes.forEach(s => s.points.forEach(p => {
+      minX=Math.min(minX,p.x); maxX=Math.max(maxX,p.x);
+      minY=Math.min(minY,p.y); maxY=Math.max(maxY,p.y);
+    }));
+    const pad = 60;
+    const scale = Math.min((W-pad*2)/(maxX-minX||1),(H-pad*2)/(maxY-minY||1));
+    const offX = pad + ((W-pad*2)-(maxX-minX)*scale)/2;
+    const offY = pad + ((H-pad*2)-(maxY-minY)*scale)/2;
+    session.strokes.forEach(st => {
+      if (!st.points || st.points.length < 2) return;
+      ctx.save();
+      ctx.strokeStyle = st.color || '#a78bfa';
+      ctx.lineWidth   = (st.size || 4) * scale * 0.5;
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.globalAlpha = st.opacity || 1;
+      ctx.shadowBlur = 12; ctx.shadowColor = st.color || '#a78bfa';
+      ctx.beginPath();
+      ctx.moveTo(offX+(st.points[0].x-minX)*scale, offY+(st.points[0].y-minY)*scale);
+      st.points.forEach(p => ctx.lineTo(offX+(p.x-minX)*scale, offY+(p.y-minY)*scale));
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+  cv.toBlob(blob => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (session.name || 'airdraw-session') + '.png';
+    a.click();
+  });
+  showToast('Downloaded! 🖼️', 'success');
+}
+
+// ── DELETE MODAL
+function openModal(id) {
+  deleteTargetId = id;
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeModal() {
+  deleteTargetId = null;
+  document.getElementById('modalBg').classList.remove('open');
+}
+document.getElementById('modalBg').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalBg')) closeModal();
+});
+document.getElementById('confirmDelete').addEventListener('click', async () => {
+  if (!deleteTargetId) return;
+  const id = deleteTargetId;
+  closeModal();
+  try {
+    const res = await fetch(API_BASE + '/api/sessions/' + id, {method:'DELETE'});
+    if (res.ok) {
+      allSessions = allSessions.filter(s => s.id !== id);
+      updateStats(allSessions);
+      applySortAndFilter();
+      showToast('Session deleted', 'success');
+    } else {
+      showToast('Delete failed — server error', 'error');
+    }
+  } catch { showToast('Delete failed — check connection', 'error'); }
+});
+
+// ── INIT
+loadSessions();
+</script>
+</body>
+</html>
