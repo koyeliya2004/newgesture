@@ -16,25 +16,24 @@
       --draw:#a78bfa;--erase:#fb7185;--move:#34d399;--idle:#60a5fa;
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-    html,body{height:100%;overflow:hidden;font-family:'Satoshi',sans-serif;background:var(--bg);color:var(--text);touch-action:none;}
+    html,body{height:100%;overflow:hidden;font-family:'Satoshi',sans-serif;background:var(--bg);color:var(--text);}
+    body{touch-action:none;}
 
-    /* TOPBAR */
     .topbar{position:fixed;top:0;left:0;right:0;height:50px;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:rgba(5,5,15,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
     .topbar-left{display:flex;align-items:center;gap:8px;min-width:0;}
     .back-btn{color:var(--muted);text-decoration:none;font-size:.78rem;padding:4px 10px;border:1px solid var(--border);border-radius:8px;white-space:nowrap;flex-shrink:0;}
     .brand{font-weight:900;font-size:.88rem;letter-spacing:-.03em;background:linear-gradient(135deg,#a78bfa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;}
-    .room-chip{font-size:.7rem;padding:3px 9px;border-radius:999px;border:1px solid var(--border);color:var(--muted);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
+    .room-chip{font-size:.7rem;padding:3px 9px;border-radius:999px;border:1px solid rgba(139,92,246,.4);color:#a78bfa;cursor:pointer;white-space:nowrap;background:rgba(139,92,246,.1);font-weight:700;}
     .topbar-right{display:flex;gap:6px;align-items:center;flex-shrink:0;}
     .status-dot{width:7px;height:7px;border-radius:50%;background:#fb7185;flex-shrink:0;}
     .status-dot.on{background:#34d399;box-shadow:0 0 6px #34d399;}
     .peers-chip{font-size:.7rem;padding:3px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted);white-space:nowrap;}
 
-    /* MAIN */
     .shell{position:fixed;inset:0;top:50px;bottom:58px;display:flex;}
 
-    /* CANVAS */
-    .canvas-wrap{flex:1;position:relative;overflow:hidden;background:#05050f;cursor:crosshair;}
+    .canvas-wrap{flex:1;position:relative;overflow:hidden;background:#05050f;}
     .canvas-wrap canvas{position:absolute;top:0;left:0;width:100%;height:100%;}
+    #drawCanvas{cursor:crosshair;}
     #skeletonCanvas{pointer-events:none;}
     #myVid{position:absolute;bottom:10px;left:10px;width:110px;height:80px;object-fit:cover;border-radius:10px;border:2px solid var(--primary);z-index:10;transform:scaleX(-1);background:#000;}
     #peerVid{position:absolute;bottom:10px;left:130px;width:110px;height:80px;object-fit:cover;border-radius:10px;border:2px solid #34d399;z-index:10;background:#111;}
@@ -44,7 +43,6 @@
     .pcursor{position:absolute;width:14px;height:14px;border-radius:50%;border:2.5px solid #34d399;pointer-events:none;z-index:20;transform:translate(-50%,-50%);display:none;transition:left .04s,top .04s;}
     .pcursor::after{content:attr(data-name);position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:.58rem;color:#34d399;white-space:nowrap;background:rgba(0,0,0,.6);padding:1px 4px;border-radius:4px;}
 
-    /* SIDEBAR — desktop */
     .sidebar{width:200px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
     .ss{padding:10px 12px;border-bottom:1px solid var(--border);}
     .stitle{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;font-weight:700;}
@@ -75,18 +73,17 @@
     .cinp:focus{border-color:var(--primary);}
     .csend{background:var(--primary);border:none;color:#fff;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:.78rem;font-weight:700;flex-shrink:0;}
 
-    /* TOOLBAR */
     .toolbar{position:fixed;bottom:0;left:0;right:0;height:58px;z-index:50;display:flex;align-items:center;gap:6px;padding:0 10px;background:rgba(5,5,15,.95);border-top:1px solid var(--border);overflow-x:auto;}
     .toolbar::-webkit-scrollbar{display:none;}
     .tdiv{width:1px;height:26px;background:var(--border);flex-shrink:0;}
     .tbtn{background:transparent;border:1px solid var(--border);color:var(--text);padding:5px 10px;border-radius:8px;cursor:pointer;font-family:'Satoshi',sans-serif;font-size:.72rem;font-weight:500;white-space:nowrap;flex-shrink:0;transition:all .15s;}
     .tbtn:hover,.tbtn.active{background:var(--surface2);border-color:var(--primary);color:var(--text);}
-    .tbtn.danger:hover{border-color:var(--erase);color:var(--erase);}
     .cambtn{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:#34d399;font-size:.72rem;font-weight:700;padding:5px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s;}
     .cambtn.off{background:rgba(251,113,133,.1);border-color:rgba(251,113,133,.3);color:#fb7185;}
+    .codebtn{background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.4);color:#a78bfa;font-size:.72rem;font-weight:700;padding:5px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s;font-family:'Satoshi',sans-serif;}
+    .codebtn:hover{background:rgba(139,92,246,.25);}
 
-    /* MOBILE bottom panel (replaces sidebar on mobile) */
-    .mob-panel{display:none;position:fixed;bottom:58px;left:0;right:0;z-index:45;background:rgba(14,14,28,.97);border-top:1px solid var(--border);padding:10px 14px;transition:transform .3s;}
+    .mob-panel{display:none;position:fixed;bottom:58px;left:0;right:0;z-index:45;background:rgba(14,14,28,.97);border-top:1px solid var(--border);padding:10px 14px;}
     .mob-panel.open{display:block;}
     .mob-panel .cgrid{grid-template-columns:repeat(10,1fr);gap:4px;margin-bottom:8px;}
     .mob-panel .bcol{flex-direction:row;flex-wrap:wrap;gap:4px;margin-bottom:8px;}
@@ -96,7 +93,6 @@
     .mob-panel .abtn{padding:5px 10px;font-size:.7rem;}
     .mob-toggle{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 10px;border-radius:8px;cursor:pointer;font-family:'Satoshi',sans-serif;font-size:.72rem;white-space:nowrap;flex-shrink:0;}
 
-    /* LOBBY */
     .lobby{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:100;padding:20px;overflow-y:auto;}
     .lobby.hidden{display:none;}
     .ltitle{font-size:clamp(1.6rem,5vw,2.8rem);font-weight:900;letter-spacing:-.04em;background:linear-gradient(135deg,#a78bfa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;}
@@ -114,20 +110,24 @@
     .jbtn:hover{border-color:var(--primary);}
     .lerr{color:#fb7185;font-size:.78rem;text-align:center;min-height:16px;}
 
-    /* TOAST */
+    /* Room code display after creation */
+    .room-code-box{display:none;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.4);border-radius:12px;padding:14px;text-align:center;}
+    .room-code-box.show{display:block;}
+    .room-code-label{font-size:.72rem;color:var(--muted);margin-bottom:6px;}
+    .room-code-val{font-size:1.8rem;font-weight:900;letter-spacing:.15em;color:#a78bfa;font-family:monospace;margin-bottom:10px;}
+    .copy-code-btn{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border:none;padding:8px 22px;border-radius:999px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:'Satoshi',sans-serif;transition:all .2s;}
+    .copy-code-btn:hover{transform:translateY(-1px);}
+
     .toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:6px 18px;font-size:.75rem;z-index:300;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
     .toast.ok{border-color:#34d399;color:#34d399;}
     .toast.err{border-color:#fb7185;color:#fb7185;}
 
-    /* RESPONSIVE */
     @media(max-width:680px){
       .sidebar{display:none;}
-      .mob-panel{display:none;}
       .mob-panel.open{display:block;}
       .mob-toggle{display:inline-flex !important;}
-      .shell{bottom:58px;}
-      #myVid,#peerVid{width:80px;height:58px;border-radius:8px;}
+      #myVid,#peerVid{width:80px;height:58px;}
       #myVid{bottom:8px;left:8px;}
       #peerVid{bottom:8px;left:96px;}
       #myVlabel{bottom:70px;left:8px;}
@@ -143,17 +143,25 @@
 <!-- LOBBY -->
 <div class="lobby" id="lobby">
   <div class="ltitle">✋ Collaborate</div>
-  <div class="lsub">Draw together in real-time. Works on mobile too! Share the link with your friend.</div>
+  <div class="lsub">Draw together in real-time. Your friend opens this app and enters your room code.</div>
+
   <div class="lcard">
     <h3>🆕 Create a New Room</h3>
-    <p>Start a room and share the link or code with your friend.</p>
+    <p>Create a room — you'll get a short code to share with your friend.</p>
     <button class="bigbtn" id="createRoomBtn">Create Room</button>
+    <!-- Code shown here after creation -->
+    <div class="room-code-box" id="roomCodeBox">
+      <div class="room-code-label">Share this code with your friend 👇</div>
+      <div class="room-code-val" id="roomCodeVal">——</div>
+      <button class="copy-code-btn" id="copyCodeBtn">📋 Copy Code</button>
+    </div>
   </div>
+
   <div class="lcard">
     <h3>🔗 Join a Room</h3>
-    <p>Enter the room code your friend shared with you.</p>
+    <p>Enter the code your friend shared with you.</p>
     <div class="jrow">
-      <input class="jinp" id="joinInput" placeholder="Room code e.g. a3f9b2c1" maxlength="8" autocomplete="off">
+      <input class="jinp" id="joinInput" placeholder="e.g. a3f9b2c1" maxlength="8" autocomplete="off">
       <button class="jbtn" id="joinRoomBtn">Join</button>
     </div>
     <div class="lerr" id="lobbyErr"></div>
@@ -165,7 +173,7 @@
   <div class="topbar-left">
     <a href="/" class="back-btn">← Back</a>
     <div class="brand">AirDraw Collab</div>
-    <div class="room-chip" id="roomChip" onclick="copyRoomLink()" title="Tap to copy link">No room</div>
+    <div class="room-chip" id="roomChip" onclick="copyCode()" title="Click to copy code">No room</div>
   </div>
   <div class="topbar-right">
     <div class="status-dot" id="statusDot"></div>
@@ -175,7 +183,6 @@
 
 <!-- SHELL -->
 <div class="shell">
-  <!-- CANVAS AREA -->
   <div class="canvas-wrap" id="canvasWrap">
     <canvas id="bgCanvas"></canvas>
     <canvas id="drawCanvas"></canvas>
@@ -187,7 +194,6 @@
     <div class="pcursor" id="peerCursor" data-name="Friend"></div>
   </div>
 
-  <!-- SIDEBAR (desktop) -->
   <div class="sidebar">
     <div class="ss">
       <div class="stitle">Colors</div>
@@ -253,7 +259,7 @@
     <div class="csw" style="background:#000000" data-color="#000000"></div>
     <div class="csw" style="background:#06b6d4" data-color="#06b6d4"></div>
   </div>
-  <div class="bcol" id="mobBrushCol">
+  <div class="bcol">
     <button class="bbtn active" data-brush="round">● Round</button>
     <button class="bbtn" data-brush="square">■ Square</button>
     <button class="bbtn" data-brush="neon">🔆 Neon</button>
@@ -273,14 +279,14 @@
 
 <!-- TOOLBAR -->
 <div class="toolbar">
-  <button class="cambtn off" id="camBtn">&#x1F4F7; Cam</button>
+  <button class="cambtn off" id="camBtn">📷 Cam</button>
   <div class="tdiv"></div>
-  <button class="tbtn" id="gestBtn">&#x270B; Gesture OFF</button>
+  <button class="tbtn" id="gestBtn">✋ Gesture OFF</button>
   <div class="tdiv"></div>
-  <button class="tbtn active" id="drawModeBtn" data-mode="touch">&#x270D; Draw</button>
+  <button class="tbtn active" id="drawModeBtn">✍ Draw ON</button>
   <div class="tdiv"></div>
-  <button class="tbtn" id="copyBtn" onclick="copyRoomLink()">&#x1F4CB; Share</button>
-  <button class="mob-toggle" id="mobToggleBtn" onclick="toggleMobPanel()">&#x1F3A8; Tools</button>
+  <button class="codebtn" id="shareCodeBtn">📋 Copy Code</button>
+  <button class="mob-toggle" id="mobToggleBtn">🎨 Tools</button>
   <div class="tdiv"></div>
   <a href="/app.html" class="tbtn" style="text-decoration:none">Solo</a>
 </div>
@@ -297,30 +303,29 @@ const S = {
   color:'#a78bfa', size:6, brush:'round',
   strokes:[], cur:null,
   cameraOn:false, gestureOn:false,
-  drawEnabled:true,   // touch/mouse drawing always on by default
+  drawEnabled:true,
   isDrawing:false,
   myStream:null,
   handsInst:null, camInst:null,
 };
 
-// Canvas refs
-const bgCv = document.getElementById('bgCanvas');
-const dCv  = document.getElementById('drawCanvas');
-const sCv  = document.getElementById('skeletonCanvas');
-const bgCtx= bgCv.getContext('2d');
-const dCtx = dCv.getContext('2d');
-const sCtx = sCv.getContext('2d');
-const myVid  = document.getElementById('myVid');
-const peerVid= document.getElementById('peerVid');
+const bgCv  = document.getElementById('bgCanvas');
+const dCv   = document.getElementById('drawCanvas');
+const sCv   = document.getElementById('skeletonCanvas');
+const bgCtx = bgCv.getContext('2d');
+const dCtx  = dCv.getContext('2d');
+const sCtx  = sCv.getContext('2d');
+const myVid   = document.getElementById('myVid');
+const peerVid = document.getElementById('peerVid');
 
-// ── Resize ────────────────────────────────────────────────────────────────────
+// ── Resize
 function resize(){
   const wrap = document.getElementById('canvasWrap');
-  const w=wrap.clientWidth, h=wrap.clientHeight;
-  [bgCv,dCv,sCv].forEach(c=>{c.width=w;c.height=h;});
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  [bgCv,dCv,sCv].forEach(c=>{ c.width=w; c.height=h; });
   drawBg(); redraw();
 }
-window.addEventListener('resize',resize);
+window.addEventListener('resize', resize);
 
 function drawBg(){
   bgCtx.fillStyle='#05050f';
@@ -331,25 +336,25 @@ function drawBg(){
   for(let y=0;y<bgCv.height;y+=40){bgCtx.beginPath();bgCtx.moveTo(0,y);bgCtx.lineTo(bgCv.width,y);bgCtx.stroke();}
 }
 
-// ── Drawing core ──────────────────────────────────────────────────────────────
+// ── Draw core
 function applyBrush(ctx,color,size,brush){
   ctx.globalAlpha=1;
-  ctx.strokeStyle=color;ctx.fillStyle=color;
-  ctx.lineWidth=size;ctx.lineCap='round';ctx.lineJoin='round';
-  if(brush==='neon'){ctx.shadowBlur=size*3;ctx.shadowColor=color;}
-  else{ctx.shadowBlur=size*1.2;ctx.shadowColor=color+'99';}
-  if(brush==='square'){ctx.lineCap='square';ctx.lineJoin='miter';}
+  ctx.strokeStyle=color; ctx.fillStyle=color;
+  ctx.lineWidth=size; ctx.lineCap='round'; ctx.lineJoin='round';
+  if(brush==='neon'){ ctx.shadowBlur=size*3; ctx.shadowColor=color; }
+  else { ctx.shadowBlur=size*1.2; ctx.shadowColor=color+'99'; }
+  if(brush==='square'){ ctx.lineCap='square'; ctx.lineJoin='miter'; }
 }
 
 function drawStroke(st){
-  if(!st||st.points.length<2)return;
+  if(!st||st.points.length<2) return;
   dCtx.save();
   applyBrush(dCtx,st.color,st.size,st.brush);
-  if(st.brush==='spray'){sprayStroke(st);dCtx.restore();return;}
+  if(st.brush==='spray'){ sprayStroke(st); dCtx.restore(); return; }
   dCtx.beginPath();
   dCtx.moveTo(st.points[0].x,st.points[0].y);
   for(let i=1;i<st.points.length;i++){
-    const p0=st.points[i-1],p1=st.points[i];
+    const p0=st.points[i-1], p1=st.points[i];
     dCtx.quadraticCurveTo(p0.x,p0.y,(p0.x+p1.x)/2,(p0.y+p1.y)/2);
   }
   dCtx.stroke();
@@ -358,10 +363,10 @@ function drawStroke(st){
 
 function sprayStroke(st){
   st.points.forEach(p=>{
-    dCtx.globalAlpha=.12;dCtx.fillStyle=st.color;
+    dCtx.globalAlpha=.12; dCtx.fillStyle=st.color;
     for(let i=0;i<14;i++){
-      const a=Math.random()*Math.PI*2,r=Math.random()*st.size*2;
-      dCtx.beginPath();dCtx.arc(p.x+Math.cos(a)*r,p.y+Math.sin(a)*r,1.5,0,Math.PI*2);dCtx.fill();
+      const a=Math.random()*Math.PI*2, r=Math.random()*st.size*2;
+      dCtx.beginPath(); dCtx.arc(p.x+Math.cos(a)*r,p.y+Math.sin(a)*r,1.5,0,Math.PI*2); dCtx.fill();
     }
   });
 }
@@ -371,188 +376,163 @@ function redraw(){
   S.strokes.forEach(drawStroke);
 }
 
-// ── Local draw helpers ────────────────────────────────────────────────────────
+// ── Draw helpers
 function startDraw(x,y){
-  S.cur={color:S.color,size:S.size,brush:S.brush,points:[{x,y}]};
+  S.isDrawing = true;
+  S.cur = {color:S.color, size:S.size, brush:S.brush, points:[{x,y}]};
   S.strokes.push(S.cur);
-  S.isDrawing=true;
-  wsSend({type:'stroke_start',color:S.color,size:S.size,brush:S.brush});
-  wsSend({type:'cursor',x:x/dCv.width,y:y/dCv.height});
+  wsSend({type:'cursor', x:x/dCv.width, y:y/dCv.height});
 }
 
 function moveDraw(x,y){
-  if(!S.isDrawing||!S.cur)return;
+  if(!S.isDrawing || !S.cur) return;
   S.cur.points.push({x,y});
-  // incremental render
-  const pts=S.cur.points;
+  const pts = S.cur.points;
   if(pts.length>1){
     dCtx.save();
     applyBrush(dCtx,S.cur.color,S.cur.size,S.cur.brush);
     if(S.cur.brush!=='spray'){
       dCtx.beginPath();
-      dCtx.moveTo(pts.at(-2).x,pts.at(-2).y);
-      dCtx.lineTo(pts.at(-1).x,pts.at(-1).y);
+      dCtx.moveTo(pts.at(-2).x, pts.at(-2).y);
+      dCtx.lineTo(pts.at(-1).x, pts.at(-1).y);
       dCtx.stroke();
     }
     dCtx.restore();
   }
-  wsSend({type:'cursor',x:x/dCv.width,y:y/dCv.height});
-  // batch send every 5 points for performance
-  if(pts.length%5===0) wsSend({type:'stroke_partial',points:pts.slice(-6)});
+  wsSend({type:'cursor', x:x/dCv.width, y:y/dCv.height});
+  if(pts.length%5===0) wsSend({type:'stroke_partial', points:pts.slice(-6), color:S.color, size:S.size, brush:S.brush});
 }
 
 function endDraw(){
-  if(!S.isDrawing)return;
-  S.isDrawing=false;
-  if(S.cur){ wsSend({type:'stroke',stroke:S.cur}); }
-  S.cur=null;
+  if(!S.isDrawing) return;
+  S.isDrawing = false;
+  if(S.cur) wsSend({type:'stroke', stroke:S.cur});
+  S.cur = null;
 }
 
-// ── Mouse events ──────────────────────────────────────────────────────────────
-dCv.addEventListener('mousedown',e=>{
-  if(!S.drawEnabled||S.gestureOn)return;
+// ── Mouse — KEY FIX: use getBoundingClientRect for correct coords
+dCv.addEventListener('mousedown', e=>{
+  if(!S.drawEnabled || S.gestureOn) return;
   e.preventDefault();
-  startDraw(e.offsetX,e.offsetY);
+  const r = dCv.getBoundingClientRect();
+  startDraw(e.clientX - r.left, e.clientY - r.top);
 });
-dCv.addEventListener('mousemove',e=>{
-  if(!S.drawEnabled||!S.isDrawing)return;
-  moveDraw(e.offsetX,e.offsetY);
+dCv.addEventListener('mousemove', e=>{
+  if(!S.drawEnabled || !S.isDrawing) return;
+  const r = dCv.getBoundingClientRect();
+  moveDraw(e.clientX - r.left, e.clientY - r.top);
 });
-dCv.addEventListener('mouseup',  ()=>endDraw());
-dCv.addEventListener('mouseleave',()=>endDraw());
+dCv.addEventListener('mouseup',    ()=> endDraw());
+dCv.addEventListener('mouseleave', ()=> endDraw());
 
-// ── Touch events (mobile) ─────────────────────────────────────────────────────
-function getPos(touch){
-  const r=dCv.getBoundingClientRect();
-  return{x:touch.clientX-r.left, y:touch.clientY-r.top};
+// ── Touch
+function getTouchPos(touch){
+  const r = dCv.getBoundingClientRect();
+  return { x: touch.clientX - r.left, y: touch.clientY - r.top };
 }
-dCv.addEventListener('touchstart',e=>{
-  if(!S.drawEnabled||S.gestureOn)return;
+dCv.addEventListener('touchstart', e=>{
+  if(!S.drawEnabled || S.gestureOn) return;
   e.preventDefault();
-  const p=getPos(e.touches[0]);
-  startDraw(p.x,p.y);
+  const p = getTouchPos(e.touches[0]);
+  startDraw(p.x, p.y);
 },{passive:false});
-dCv.addEventListener('touchmove',e=>{
-  if(!S.drawEnabled||!S.isDrawing)return;
+dCv.addEventListener('touchmove', e=>{
+  if(!S.drawEnabled || !S.isDrawing) return;
   e.preventDefault();
-  const p=getPos(e.touches[0]);
-  moveDraw(p.x,p.y);
+  const p = getTouchPos(e.touches[0]);
+  moveDraw(p.x, p.y);
 },{passive:false});
-dCv.addEventListener('touchend', ()=>endDraw());
-dCv.addEventListener('touchcancel',()=>endDraw());
+dCv.addEventListener('touchend',    ()=> endDraw());
+dCv.addEventListener('touchcancel', ()=> endDraw());
 
-// ── Controls ──────────────────────────────────────────────────────────────────
-function bindColorGrid(gridId){
-  document.getElementById(gridId).addEventListener('click',e=>{
-    const sw=e.target.closest('.csw');if(!sw)return;
-    // sync both grids
+// ── Controls
+document.querySelectorAll('#colorGrid, #mobColorGrid').forEach(grid=>{
+  grid.addEventListener('click', e=>{
+    const sw = e.target.closest('.csw'); if(!sw) return;
     document.querySelectorAll('.csw').forEach(s=>s.classList.remove('active'));
-    document.querySelectorAll(`[data-color="${sw.dataset.color}"]`).forEach(s=>s.classList.add('active'));
-    S.color=sw.dataset.color;
+    document.querySelectorAll(`.csw[data-color="${sw.dataset.color}"]`).forEach(s=>s.classList.add('active'));
+    S.color = sw.dataset.color;
   });
-}
-bindColorGrid('colorGrid');
-bindColorGrid('mobColorGrid');
+});
 
-function bindBrushCol(colId){
-  document.getElementById(colId).addEventListener('click',e=>{
-    const b=e.target.closest('.bbtn');if(!b)return;
-    document.querySelectorAll('.bbtn').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll(`[data-brush="${b.dataset.brush}"]`).forEach(x=>x.classList.add('active'));
-    S.brush=b.dataset.brush;
-  });
-}
-bindBrushCol('colorGrid'.replace('colorGrid','sidebar') || 'canvasWrap'); // fallback
-// simpler: attach directly
 document.querySelectorAll('.bbtn').forEach(b=>{
   b.addEventListener('click',()=>{
     document.querySelectorAll('.bbtn').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll(`[data-brush="${b.dataset.brush}"]`).forEach(x=>x.classList.add('active'));
-    S.brush=b.dataset.brush;
+    document.querySelectorAll(`.bbtn[data-brush="${b.dataset.brush}"]`).forEach(x=>x.classList.add('active'));
+    S.brush = b.dataset.brush;
     showToast('Brush: '+S.brush);
   });
 });
 
-function bindSlider(id,labelId){
-  const el=document.getElementById(id);
-  el.addEventListener('input',()=>{
-    S.size=parseInt(el.value);
-    document.getElementById(labelId).textContent=S.size;
-    // sync other slider
-    ['sizeSlider','mobSizeSlider'].forEach(sid=>{ if(sid!==id) document.getElementById(sid).value=S.size; });
-    ['sizeVal','mobSizeVal'].forEach(lid=>{ document.getElementById(lid).textContent=S.size; });
+['sizeSlider','mobSizeSlider'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', e=>{
+    S.size = parseInt(e.target.value);
+    ['sizeSlider','mobSizeSlider'].forEach(s=> document.getElementById(s).value=S.size);
+    ['sizeVal','mobSizeVal'].forEach(s=> document.getElementById(s).textContent=S.size);
   });
-}
-bindSlider('sizeSlider','sizeVal');
-bindSlider('mobSizeSlider','mobSizeVal');
+});
 
-function bindUndo(id){document.getElementById(id).addEventListener('click',doUndo);}
-function bindClear(id){document.getElementById(id).addEventListener('click',doClear);}
-function bindSave(id){document.getElementById(id).addEventListener('click',doSave);}
-bindUndo('undoBtn');bindUndo('mobUndoBtn');
-bindClear('clearBtn');bindClear('mobClearBtn');
-bindSave('saveBtn');bindSave('mobSaveBtn');
+document.getElementById('undoBtn').addEventListener('click', doUndo);
+document.getElementById('clearBtn').addEventListener('click', doClear);
+document.getElementById('saveBtn').addEventListener('click', doSave);
+document.getElementById('mobUndoBtn').addEventListener('click', doUndo);
+document.getElementById('mobClearBtn').addEventListener('click', doClear);
+document.getElementById('mobSaveBtn').addEventListener('click', doSave);
 
-function doUndo(){
-  if(!S.strokes.length)return;
-  S.strokes.pop();S.cur=null;redraw();
-  wsSend({type:'undo'});
-  showToast('Undone');
-}
-function doClear(){
-  S.strokes=[];S.cur=null;redraw();
-  wsSend({type:'clear'});
-  showToast('Canvas cleared');
-}
+function doUndo(){ if(!S.strokes.length)return; S.strokes.pop(); S.cur=null; redraw(); wsSend({type:'undo'}); showToast('Undone'); }
+function doClear(){ S.strokes=[]; S.cur=null; redraw(); wsSend({type:'clear'}); showToast('Canvas cleared'); }
 function doSave(){
-  const out=document.createElement('canvas');
-  out.width=dCv.width;out.height=dCv.height;
-  const c=out.getContext('2d');c.drawImage(bgCv,0,0);c.drawImage(dCv,0,0);
-  out.toBlob(blob=>{
-    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-    a.download='collab-'+Date.now()+'.png';a.click();
-  });showToast('Saved! \ud83d\uddbc\ufe0f');
+  const out=document.createElement('canvas'); out.width=dCv.width; out.height=dCv.height;
+  const c=out.getContext('2d'); c.drawImage(bgCv,0,0); c.drawImage(dCv,0,0);
+  out.toBlob(blob=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='collab-'+Date.now()+'.png'; a.click(); });
+  showToast('Saved! 🖼️');
 }
 
-// draw mode toggle
 document.getElementById('drawModeBtn').addEventListener('click',()=>{
-  S.drawEnabled=!S.drawEnabled;
-  const btn=document.getElementById('drawModeBtn');
-  btn.classList.toggle('active',S.drawEnabled);
-  btn.textContent=S.drawEnabled?'\u270D Draw ON':'\u270D Draw OFF';
-  showToast('Drawing: '+(S.drawEnabled?'ON':'OFF'));
+  S.drawEnabled = !S.drawEnabled;
+  const btn = document.getElementById('drawModeBtn');
+  btn.classList.toggle('active', S.drawEnabled);
+  btn.textContent = S.drawEnabled ? '✍ Draw ON' : '✍ Draw OFF';
+  showToast('Drawing '+(S.drawEnabled?'ON':'OFF'));
 });
 
-// gesture toggle
 document.getElementById('gestBtn').addEventListener('click',()=>{
-  if(S.gestureOn)stopGesture();
-  else startGesture();
+  if(S.gestureOn) stopGesture(); else startGesture();
 });
 
-// cam toggle
-document.getElementById('camBtn').addEventListener('click',toggleCamera);
+document.getElementById('camBtn').addEventListener('click', toggleCamera);
+document.getElementById('mobToggleBtn').addEventListener('click',()=> document.getElementById('mobPanel').classList.toggle('open'));
 
-// mobile panel
-function toggleMobPanel(){
-  document.getElementById('mobPanel').classList.toggle('open');
+// ── Copy code only (no URL)
+function copyCode(){
+  if(!S.roomId){ showToast('No room yet!','err'); return; }
+  navigator.clipboard.writeText(S.roomId)
+    .then(()=> showToast('Code copied: '+S.roomId+' 📋','ok'))
+    .catch(()=>{ showToast(S.roomId,'ok',5000); });
 }
+document.getElementById('shareCodeBtn').addEventListener('click', copyCode);
+document.getElementById('copyCodeBtn').addEventListener('click',()=>{
+  navigator.clipboard.writeText(S.roomId)
+    .then(()=> showToast('Code copied! 📋','ok'))
+    .catch(()=>{ showToast(S.roomId,'ok',5000); });
+});
 
-// ── WebSocket ─────────────────────────────────────────────────────────────────
+// ── WebSocket
 function wsSend(obj){
-  if(S.ws&&S.ws.readyState===1) S.ws.send(JSON.stringify(obj));
+  if(S.ws && S.ws.readyState===1) S.ws.send(JSON.stringify(obj));
 }
 
 function connectWS(roomId){
-  if(S.ws){try{S.ws.close();}catch(_){}}
-  S.ws=new WebSocket(WS_BASE+'/ws/room/'+roomId);
-  S.ws.onopen=()=>{ setStatus(true); showToast('Connected! Room: '+roomId,'ok'); };
-  S.ws.onclose=()=>{
+  if(S.ws){ try{S.ws.close();}catch(_){} }
+  S.ws = new WebSocket(WS_BASE+'/ws/room/'+roomId);
+  S.ws.onopen  = ()=>{ setStatus(true); showToast('Connected!','ok'); };
+  S.ws.onclose = ()=>{
     setStatus(false);
-    showToast('Disconnected — reconnecting…','err');
+    showToast('Reconnecting…','err');
     setTimeout(()=>{ if(S.roomId) connectWS(S.roomId); },3000);
   };
-  S.ws.onerror=()=>showToast('Connection error','err');
-  S.ws.onmessage=e=>{ try{handleMsg(JSON.parse(e.data));}catch(_){} };
+  S.ws.onerror = ()=> showToast('Connection error','err');
+  S.ws.onmessage = e=>{ try{ handleMsg(JSON.parse(e.data)); }catch(_){} };
 }
 
 function handleMsg(d){
@@ -562,17 +542,16 @@ function handleMsg(d){
       updatePeers(d.peer_count);
       if(d.strokes&&d.strokes.length){ S.strokes=d.strokes; redraw(); }
       addChat('sys','You joined as '+d.role+' ('+d.peer_count+'/2)');
-      showToast(d.role==='host'?'Room ready! Share code: '+S.roomId:'Joined room!','ok');
+      if(d.role==='host') showToast('Room ready! Code: '+S.roomId,'ok',4000);
+      else showToast('Joined room!','ok');
       break;
     case 'peer_joined':
-      updatePeers(2);
-      addChat('sys','\ud83c\udf89 Friend joined!');
-      showToast('Friend is here! \ud83c\udf89','ok');
+      updatePeers(2); addChat('sys','🎉 Friend joined!');
+      showToast('Friend is here! 🎉','ok');
       if(S.role==='host'&&S.myStream) startWebRTC();
       break;
     case 'peer_left':
-      updatePeers(1);
-      addChat('sys','Friend left.');
+      updatePeers(1); addChat('sys','Friend left.');
       showToast('Friend left','err');
       if(S.pc){S.pc.close();S.pc=null;}
       peerVid.srcObject=null;
@@ -581,11 +560,9 @@ function handleMsg(d){
       if(d.stroke){ S.strokes.push(d.stroke); drawStroke(d.stroke); }
       break;
     case 'stroke_partial':
-      // live preview of friend's stroke in progress
       if(d.points&&d.points.length>1){
         dCtx.save();
-        const tmpColor=d.color||'#34d399', tmpSize=d.size||6, tmpBrush=d.brush||'round';
-        applyBrush(dCtx,tmpColor,tmpSize,tmpBrush);
+        applyBrush(dCtx, d.color||'#34d399', d.size||6, d.brush||'round');
         dCtx.beginPath();
         dCtx.moveTo(d.points[0].x,d.points[0].y);
         for(let i=1;i<d.points.length;i++) dCtx.lineTo(d.points[i].x,d.points[i].y);
@@ -593,43 +570,39 @@ function handleMsg(d){
         dCtx.restore();
       }
       break;
-    case 'stroke_start':
-      // nothing needed — we get incremental via stroke_partial + final stroke
-      break;
-    case 'clear': S.strokes=[];redraw();addChat('sys','Canvas cleared');break;
-    case 'undo': if(S.strokes.length){S.strokes.pop();redraw();}break;
+    case 'clear':  S.strokes=[]; redraw(); addChat('sys','Canvas cleared'); break;
+    case 'undo':   if(S.strokes.length){S.strokes.pop();redraw();} break;
     case 'cursor':
-      const cur=document.getElementById('peerCursor');
-      cur.style.display='block';
-      cur.style.left=(d.x*dCv.width)+'px';
-      cur.style.top=(d.y*dCv.height)+'px';
+      const pc = document.getElementById('peerCursor');
+      pc.style.display='block';
+      pc.style.left=(d.x*dCv.width)+'px';
+      pc.style.top=(d.y*dCv.height)+'px';
       break;
-    case 'chat': addChat('peer',d.text);break;
-    case 'offer':  handleOffer(d.sdp);break;
-    case 'answer': handleAnswer(d.sdp);break;
-    case 'ice-candidate': handleICE(d.candidate);break;
+    case 'chat':  addChat('peer',d.text); break;
+    case 'offer':         handleOffer(d.sdp); break;
+    case 'answer':        handleAnswer(d.sdp); break;
+    case 'ice-candidate': handleICE(d.candidate); break;
     case 'error':
-      showToast('\u274c '+d.message,'err');
+      showToast('❌ '+d.message,'err');
       document.getElementById('lobbyErr').textContent=d.message;
       document.getElementById('lobby').classList.remove('hidden');
       break;
   }
 }
 
-// ── WebRTC ────────────────────────────────────────────────────────────────────
-const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]};
+// ── WebRTC
+const ICE = {iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]};
 
 function createPC(){
   if(S.pc){try{S.pc.close();}catch(_){}}
-  S.pc=new RTCPeerConnection(ICE);
-  S.pc.onicecandidate=e=>{ if(e.candidate) wsSend({type:'ice-candidate',candidate:e.candidate}); };
-  S.pc.ontrack=e=>{ if(e.streams&&e.streams[0]) peerVid.srcObject=e.streams[0]; };
-  S.pc.onconnectionstatechange=()=>{
-    if(S.pc.connectionState==='connected') showToast('\ud83c\udfa5 Video connected!','ok');
+  S.pc = new RTCPeerConnection(ICE);
+  S.pc.onicecandidate = e=>{ if(e.candidate) wsSend({type:'ice-candidate',candidate:e.candidate}); };
+  S.pc.ontrack = e=>{ if(e.streams&&e.streams[0]) peerVid.srcObject=e.streams[0]; };
+  S.pc.onconnectionstatechange = ()=>{
+    if(S.pc.connectionState==='connected') showToast('🎥 Video connected!','ok');
   };
   return S.pc;
 }
-
 async function startWebRTC(){
   if(!S.myStream)return;
   const pc=createPC();
@@ -638,7 +611,6 @@ async function startWebRTC(){
   await pc.setLocalDescription(offer);
   wsSend({type:'offer',sdp:offer});
 }
-
 async function handleOffer(sdp){
   const pc=createPC();
   if(S.myStream) S.myStream.getTracks().forEach(t=>pc.addTrack(t,S.myStream));
@@ -650,37 +622,29 @@ async function handleOffer(sdp){
 async function handleAnswer(sdp){ if(S.pc) await S.pc.setRemoteDescription(new RTCSessionDescription(sdp)); }
 async function handleICE(c){ if(S.pc&&c){try{await S.pc.addIceCandidate(new RTCIceCandidate(c));}catch(_){}} }
 
-// ── Camera ────────────────────────────────────────────────────────────────────
+// ── Camera
 async function startCamera(){
   try{
-    S.myStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:640,height:480},audio:false});
-    myVid.srcObject=S.myStream;
-    S.cameraOn=true;
+    S.myStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:640,height:480},audio:false});
+    myVid.srcObject = S.myStream;
+    S.cameraOn = true;
     const btn=document.getElementById('camBtn');
-    btn.textContent='\ud83d\udcf7 Cam ON';btn.className='cambtn';
+    btn.textContent='📷 Cam ON'; btn.className='cambtn';
     showToast('Camera on!','ok');
-  }catch(err){
-    showToast('Camera error: '+err.message,'err');
-  }
+  }catch(err){ showToast('Camera error: '+err.message,'err'); }
 }
-
 function stopCamera(){
   if(S.myStream){S.myStream.getTracks().forEach(t=>t.stop());S.myStream=null;}
-  myVid.srcObject=null;
-  S.cameraOn=false;
+  myVid.srcObject=null; S.cameraOn=false;
   const btn=document.getElementById('camBtn');
-  btn.textContent='\ud83d\udcf7 Cam';btn.className='cambtn off';
-  if(S.camInst){try{S.camInst.stop();}catch(_){} S.camInst=null;}
+  btn.textContent='📷 Cam'; btn.className='cambtn off';
+  if(S.camInst){try{S.camInst.stop();}catch(_){}S.camInst=null;}
   stopGesture();
-  showToast('Camera off');
 }
+function toggleCamera(){ if(S.cameraOn) stopCamera(); else startCamera(); }
 
-function toggleCamera(){
-  if(S.cameraOn)stopCamera();else startCamera();
-}
-
-// ── Gesture (MediaPipe) ───────────────────────────────────────────────────────
-const TIPS=[4,8,12,16,20],PIPS=[3,6,10,14,18];
+// ── Gesture
+const TIPS=[4,8,12,16,20], PIPS=[3,6,10,14,18];
 function fingerUp(lm,f){return f===0?Math.abs(lm[4].x-lm[2].x)>.05:lm[TIPS[f]].y<lm[PIPS[f]].y;}
 function detectG(lm){
   const fs=[0,1,2,3,4].map(i=>fingerUp(lm,i));
@@ -694,16 +658,15 @@ function renderSkel(lm,g){
   const pts=lm.map(l=>({x:(1-l.x)*sCv.width,y:l.y*sCv.height}));
   const c=g==='DRAW'?'#a78bfa':g==='ERASE'?'#fb7185':'#60a5fa';
   sCtx.save();
-  sCtx.strokeStyle=c;sCtx.lineWidth=2;sCtx.shadowBlur=6;sCtx.shadowColor=c;
+  sCtx.strokeStyle=c; sCtx.lineWidth=2; sCtx.shadowBlur=6; sCtx.shadowColor=c;
   CONNS.forEach(([a,b])=>{sCtx.beginPath();sCtx.moveTo(pts[a].x,pts[a].y);sCtx.lineTo(pts[b].x,pts[b].y);sCtx.stroke();});
   pts.forEach((p,i)=>{const tip=TIPS.includes(i);sCtx.beginPath();sCtx.arc(p.x,p.y,tip?5:2.5,0,Math.PI*2);sCtx.fillStyle=tip?c:c+'88';sCtx.fill();});
   sCtx.restore();
-  return pts;
 }
 
 function onHandRes(res){
   sCtx.clearRect(0,0,sCv.width,sCv.height);
-  if(!res.multiHandLandmarks?.length){endDraw();return;}
+  if(!res.multiHandLandmarks?.length){ endDraw(); return; }
   const lm=res.multiHandLandmarks[0];
   const g=detectG(lm);
   renderSkel(lm,g);
@@ -713,10 +676,10 @@ function onHandRes(res){
     else moveDraw(ix,iy);
   } else if(g==='ERASE'){
     endDraw();
-    const cx=(1-lm[9].x)*dCv.width,cy=lm[9].y*dCv.height;
+    const cx=(1-lm[9].x)*dCv.width, cy=lm[9].y*dCv.height;
     const before=S.strokes.length;
     S.strokes=S.strokes.filter(s=>!s.points.some(p=>Math.hypot(p.x-cx,p.y-cy)<55));
-    if(S.strokes.length<before){redraw();wsSend({type:'clear'});}
+    if(S.strokes.length<before){ redraw(); wsSend({type:'clear'}); }
   } else endDraw();
 }
 
@@ -731,89 +694,74 @@ async function startGesture(){
   }
   S.camInst=new Camera(myVid,{onFrame:async()=>await S.handsInst.send({image:myVid}),width:640,height:480});
   await S.camInst.start();
-  S.gestureOn=true;
-  S.drawEnabled=false; // hand takes over
+  S.gestureOn=true; S.drawEnabled=false;
   document.getElementById('drawModeBtn').classList.remove('active');
-  document.getElementById('drawModeBtn').textContent='\u270D Draw OFF';
-  document.getElementById('gestBtn').textContent='\u270B Gesture ON';
-  showToast('Gesture ON \u270B','ok');
+  document.getElementById('drawModeBtn').textContent='✍ Draw OFF';
+  document.getElementById('gestBtn').textContent='✋ Gesture ON';
+  showToast('Gesture ON ✋','ok');
 }
-
 function stopGesture(){
   if(S.camInst){try{S.camInst.stop();}catch(_){}S.camInst=null;}
   sCtx.clearRect(0,0,sCv.width,sCv.height);
-  endDraw();
-  S.gestureOn=false;
-  document.getElementById('gestBtn').textContent='\u270B Gesture OFF';
-  // re-enable touch draw
+  endDraw(); S.gestureOn=false;
+  document.getElementById('gestBtn').textContent='✋ Gesture OFF';
   S.drawEnabled=true;
   document.getElementById('drawModeBtn').classList.add('active');
-  document.getElementById('drawModeBtn').textContent='\u270D Draw ON';
+  document.getElementById('drawModeBtn').textContent='✍ Draw ON';
   showToast('Gesture OFF');
 }
 
-// ── Chat ──────────────────────────────────────────────────────────────────────
+// ── Chat
 function addChat(from,text){
   const box=document.getElementById('chatMsgs');
   const d=document.createElement('div');
   d.className='cmsg '+from;
   d.textContent=from==='me'?'You: '+text:from==='peer'?'Friend: '+text:text;
-  box.appendChild(d);
-  box.scrollTop=box.scrollHeight;
+  box.appendChild(d); box.scrollTop=box.scrollHeight;
 }
 function sendChat(){
   const inp=document.getElementById('chatInp');
-  const t=inp.value.trim();if(!t)return;
-  addChat('me',t);
-  wsSend({type:'chat',text:t});
-  inp.value='';
+  const t=inp.value.trim(); if(!t)return;
+  addChat('me',t); wsSend({type:'chat',text:t}); inp.value='';
 }
 document.getElementById('chatSend').addEventListener('click',sendChat);
-document.getElementById('chatInp').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();});
+document.getElementById('chatInp').addEventListener('keydown',e=>{ if(e.key==='Enter') sendChat(); });
 
-// ── Room ──────────────────────────────────────────────────────────────────────
-function setStatus(on){
-  document.getElementById('statusDot').className='status-dot'+(on?' on':'');
-}
-function updatePeers(n){
-  document.getElementById('peersChip').textContent=n+'/2';
-}
-function setRoomChip(id){
-  document.getElementById('roomChip').textContent='Room: '+id;
-}
-function copyRoomLink(){
-  if(!S.roomId){showToast('Join a room first!','err');return;}
-  const url=location.origin+'/collab.html?room='+S.roomId;
-  if(navigator.share){
-    navigator.share({title:'AirDraw Collab',text:'Join my drawing room!',url}).catch(()=>{});
-  } else {
-    navigator.clipboard.writeText(url).then(()=>showToast('Link copied! \ud83d\udccb','ok'));
-  }
-}
+// ── Room
+function setStatus(on){ document.getElementById('statusDot').className='status-dot'+(on?' on':''); }
+function updatePeers(n){ document.getElementById('peersChip').textContent=n+'/2'; }
 
 async function createRoom(){
   const btn=document.getElementById('createRoomBtn');
-  btn.disabled=true;btn.textContent='Creating…';
+  btn.disabled=true; btn.textContent='Creating…';
   try{
     const res=await fetch(API_BASE+'/api/rooms',{method:'POST'});
     const data=await res.json();
-    enterRoom(data.room_id);
+    S.roomId=data.room_id;
+    // Show code in lobby before entering
+    document.getElementById('roomCodeVal').textContent=data.room_id;
+    document.getElementById('roomCodeBox').classList.add('show');
+    btn.textContent='✅ Enter Room';
+    btn.disabled=false;
+    btn.onclick=()=>enterRoom(data.room_id);
+    // auto-copy code
+    navigator.clipboard.writeText(data.room_id).catch(()=>{});
+    showToast('Code ready: '+data.room_id,'ok',5000);
   }catch(err){
     document.getElementById('lobbyErr').textContent='Backend waking up… try again in 30s';
-    showToast('Backend starting up…','err');
-  }finally{
-    btn.disabled=false;btn.textContent='Create Room';
+    showToast('Backend starting…','err');
+    btn.disabled=false; btn.textContent='Create Room';
   }
 }
 
 function enterRoom(roomId){
   S.roomId=roomId;
-  setRoomChip(roomId);
+  document.getElementById('roomChip').textContent=roomId;
   connectWS(roomId);
   document.getElementById('lobby').classList.add('hidden');
-  history.replaceState(null,'','/collab.html?room='+roomId);
+  // remove ?room= from URL — keep URL clean, code-only sharing
+  history.replaceState(null,'','/collab.html');
   resize();
-  showToast('Entered room '+roomId,'ok');
 }
 
 function joinRoom(){
@@ -823,24 +771,18 @@ function joinRoom(){
   enterRoom(code);
 }
 
-document.getElementById('createRoomBtn').addEventListener('click',createRoom);
-document.getElementById('joinRoomBtn').addEventListener('click',joinRoom);
-document.getElementById('joinInput').addEventListener('keydown',e=>{if(e.key==='Enter')joinRoom();});
+document.getElementById('createRoomBtn').addEventListener('click', createRoom);
+document.getElementById('joinRoomBtn').addEventListener('click', joinRoom);
+document.getElementById('joinInput').addEventListener('keydown',e=>{ if(e.key==='Enter') joinRoom(); });
 
-// ── Toast ─────────────────────────────────────────────────────────────────────
+// ── Toast
 function showToast(msg,type='',ms=2500){
   const t=document.getElementById('toast');
-  t.textContent=msg;t.className='toast show'+(type?' '+type:'');
-  clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',ms);
+  t.textContent=msg; t.className='toast show'+(type?' '+type:'');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast',ms);
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
-const urlRoom=new URLSearchParams(location.search).get('room');
-if(urlRoom){
-  document.getElementById('joinInput').value=urlRoom;
-  // auto-join after a tick
-  setTimeout(()=>enterRoom(urlRoom),300);
-}
+// ── Init
 resize();
 </script>
 </body>
