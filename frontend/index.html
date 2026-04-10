@@ -17,27 +17,14 @@
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Satoshi',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100dvh}
-
-    /* ── topbar ── */
-    .topbar{
-      position:fixed;top:0;left:0;right:0;height:56px;
-      display:flex;align-items:center;justify-content:space-between;padding:0 18px;
-      background:rgba(10,10,16,.88);backdrop-filter:blur(16px);
-      border-bottom:1px solid var(--border);z-index:30;
-    }
+    .topbar{position:fixed;top:0;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:rgba(10,10,16,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);z-index:30;}
     .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:1rem;letter-spacing:-.03em}
     .brand-dot{width:10px;height:10px;border-radius:50%;background:var(--draw);box-shadow:0 0 8px var(--draw)}
     .topbar-right{display:flex;align-items:center;gap:10px}
     .cam-status{font-size:.72rem;color:var(--muted);padding:3px 11px;border:1px solid var(--border);border-radius:999px}
-
-    /* stats HUD */
-    .stats-hud{
-      display:flex;gap:14px;font-size:.72rem;color:var(--muted);
-    }
+    .stats-hud{display:flex;gap:14px;font-size:.72rem;color:var(--muted);}
     .stat-item{display:flex;flex-direction:column;align-items:center;gap:1px}
     .stat-val{font-size:.9rem;font-weight:700;color:var(--text)}
-
-    /* ── canvas layers ── */
     .app{position:fixed;inset:0}
     video,canvas{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
     video{opacity:0;transition:opacity .5s}
@@ -45,13 +32,7 @@
     video,#skeletonCanvas,#particleCanvas{transform:scaleX(-1)}
     #drawCanvas,#particleCanvas{pointer-events:none}
     #bgCanvas{pointer-events:none}
-
-    /* ── panels ── */
-    .panel{
-      position:fixed;z-index:20;
-      background:rgba(17,17,26,.9);border:1px solid var(--border);
-      backdrop-filter:blur(18px);border-radius:16px;
-    }
+    .panel{position:fixed;z-index:20;background:rgba(17,17,26,.9);border:1px solid var(--border);backdrop-filter:blur(18px);border-radius:16px;}
     .legend{top:72px;left:18px;padding:13px 15px;font-size:.76rem;color:var(--muted);line-height:2}
     .legend-title{font-weight:700;color:var(--text);margin-bottom:2px;font-size:.82rem}
     .legend-row{display:flex;align-items:center;gap:8px}
@@ -59,149 +40,59 @@
     .modes{top:72px;right:18px;padding:11px 13px;display:flex;flex-direction:column;gap:9px;min-width:160px}
     .mode-row{display:flex;align-items:center;gap:8px;font-size:.78rem}
     .mdot{width:10px;height:10px;border-radius:50%;background:var(--idle);transition:background .15s,box-shadow .15s;flex-shrink:0}
-
-    /* ── bottom toolbar ── */
-    .toolbar{
-      position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
-      display:flex;align-items:center;gap:0;
-      background:rgba(17,17,26,.94);border:1px solid var(--border);
-      backdrop-filter:blur(18px);border-radius:18px;
-      padding:10px 16px;gap:10px;white-space:nowrap;z-index:20;
-      max-width:calc(100vw - 32px);overflow-x:auto;
-    }
+    .toolbar{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;background:rgba(17,17,26,.94);border:1px solid var(--border);backdrop-filter:blur(18px);border-radius:18px;padding:10px 16px;gap:10px;white-space:nowrap;z-index:20;max-width:calc(100vw - 32px);overflow-x:auto;}
     .toolbar::-webkit-scrollbar{display:none}
-
-    /* swatches */
     .colors{display:flex;gap:6px;align-items:center}
     .sw{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .15s,border-color .15s;flex-shrink:0}
     .sw:hover{transform:scale(1.18)}
     .sw.active{border-color:#fff;transform:scale(1.18)}
-    .sw-custom{
-      background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);
-      display:flex;align-items:center;justify-content:center;font-size:.6rem;color:#fff;
-      cursor:pointer;border-radius:50%;width:24px;height:24px;border:2px solid transparent;
-      flex-shrink:0;transition:transform .15s;
-    }
+    .sw-custom{background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);display:flex;align-items:center;justify-content:center;font-size:.6rem;color:#fff;cursor:pointer;border-radius:50%;width:24px;height:24px;border:2px solid transparent;flex-shrink:0;transition:transform .15s;}
     .sw-custom:hover{transform:scale(1.18)}
-    #colorPickerInput{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
-
     .divider{width:1px;height:26px;background:var(--border);flex-shrink:0}
-
-    /* brush shape picker */
     .brush-group{display:flex;gap:5px;align-items:center}
-    .brush-btn{
-      background:transparent;border:1px solid var(--border);color:var(--muted);
-      border-radius:8px;padding:4px 9px;cursor:pointer;font-size:.75rem;
-      font-family:'Satoshi',sans-serif;transition:all .15s;
-    }
+    .brush-btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:4px 9px;cursor:pointer;font-size:.75rem;font-family:'Satoshi',sans-serif;transition:all .15s;}
     .brush-btn:hover,.brush-btn.active{background:var(--surface2);border-color:var(--primary);color:var(--text)}
-
-    /* sliders */
     .slider-group{display:flex;align-items:center;gap:7px;font-size:.72rem;color:var(--muted)}
     input[type=range]{-webkit-appearance:none;width:72px;height:4px;background:var(--border);border-radius:2px;cursor:pointer}
     input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--draw)}
-
-    /* buttons */
-    .btn{
-      background:transparent;color:var(--text);border:1px solid var(--border);
-      padding:6px 12px;border-radius:10px;cursor:pointer;font-family:'Satoshi',sans-serif;
-      font-size:.78rem;font-weight:500;transition:all .15s;white-space:nowrap;
-    }
+    .btn{background:transparent;color:var(--text);border:1px solid var(--border);padding:6px 12px;border-radius:10px;cursor:pointer;font-family:'Satoshi',sans-serif;font-size:.78rem;font-weight:500;transition:all .15s;white-space:nowrap;}
     .btn:hover{background:var(--surface2);border-color:var(--primary)}
     .btn.danger:hover{border-color:var(--erase);color:var(--erase)}
     .btn.success:hover{border-color:var(--move);color:var(--move)}
-
-    /* bg theme picker */
     .bg-group{display:flex;gap:5px;align-items:center}
-    .bg-btn{
-      background:transparent;border:1px solid var(--border);color:var(--muted);
-      border-radius:8px;padding:4px 8px;cursor:pointer;font-size:.72rem;
-      font-family:'Satoshi',sans-serif;transition:all .15s;
-    }
+    .bg-btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:4px 8px;cursor:pointer;font-size:.72rem;font-family:'Satoshi',sans-serif;transition:all .15s;}
     .bg-btn:hover,.bg-btn.active{background:var(--surface2);border-color:var(--primary);color:var(--text)}
-
-    /* ── color picker popup ── */
-    .color-popup{
-      position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
-      background:rgba(17,17,26,.97);border:1px solid var(--border);
-      backdrop-filter:blur(18px);border-radius:16px;
-      padding:16px;z-index:40;display:none;flex-direction:column;gap:12px;align-items:center;
-      box-shadow:0 12px 40px #0008;
-    }
+    .color-popup{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(17,17,26,.97);border:1px solid var(--border);backdrop-filter:blur(18px);border-radius:16px;padding:16px;z-index:40;display:none;flex-direction:column;gap:12px;align-items:center;box-shadow:0 12px 40px #0008;}
     .color-popup.open{display:flex}
     .color-popup input[type=color]{width:120px;height:40px;border:none;background:none;cursor:pointer;border-radius:8px}
     .color-popup .hex-row{display:flex;gap:8px;align-items:center}
-    .color-popup .hex-input{
-      background:var(--surface2);border:1px solid var(--border);color:var(--text);
-      border-radius:8px;padding:5px 10px;font-size:.82rem;width:110px;
-      font-family:'Satoshi',sans-serif;
-    }
-    .color-popup .apply-btn{
-      background:var(--primary);color:#fff;border:none;
-      padding:6px 18px;border-radius:8px;cursor:pointer;
-      font-family:'Satoshi',sans-serif;font-size:.82rem;font-weight:600;
-    }
-    .color-popup-close{
-      position:absolute;top:8px;right:12px;background:none;border:none;
-      color:var(--muted);cursor:pointer;font-size:1.1rem;
-    }
-
-    /* ── overlay ── */
-    .overlay{
-      position:fixed;inset:0;background:rgba(8,8,14,.96);backdrop-filter:blur(10px);
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      gap:22px;z-index:50;transition:opacity .5s;
-    }
+    .color-popup .hex-input{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:5px 10px;font-size:.82rem;width:110px;font-family:'Satoshi',sans-serif;}
+    .color-popup .apply-btn{background:var(--primary);color:#fff;border:none;padding:6px 18px;border-radius:8px;cursor:pointer;font-family:'Satoshi',sans-serif;font-size:.82rem;font-weight:600;}
+    .color-popup-close{position:absolute;top:8px;right:12px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;}
+    .overlay{position:fixed;inset:0;background:rgba(8,8,14,.96);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;z-index:50;transition:opacity .5s;}
     .overlay.hidden{opacity:0;pointer-events:none}
-    .big-title{
-      font-size:clamp(2.2rem,6vw,4.5rem);font-weight:700;letter-spacing:-.04em;
-      background:linear-gradient(135deg,#a78bfa 30%,#34d399);
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    }
+    .big-title{font-size:clamp(2.2rem,6vw,4.5rem);font-weight:700;letter-spacing:-.04em;background:linear-gradient(135deg,#a78bfa 30%,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
     .sub{color:var(--muted);font-size:.95rem;line-height:1.6;text-align:center;max-width:480px;padding:0 20px}
-    .start-btn{
-      background:var(--primary);color:#fff;border:none;padding:13px 30px;
-      border-radius:999px;font-size:1rem;font-weight:700;cursor:pointer;
-      font-family:'Satoshi',sans-serif;box-shadow:0 0 28px rgba(139,92,246,.45);
-      transition:transform .15s,box-shadow .15s;
-    }
+    .start-btn{background:var(--primary);color:#fff;border:none;padding:13px 30px;border-radius:999px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'Satoshi',sans-serif;box-shadow:0 0 28px rgba(139,92,246,.45);transition:transform .15s,box-shadow .15s;}
     .start-btn:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(139,92,246,.6)}
     .start-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
     .gesture-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;padding:0 20px;max-width:460px;width:100%}
-    .g-card{
-      background:var(--surface);border:1px solid var(--border);border-radius:12px;
-      padding:11px 13px;font-size:.8rem;line-height:1.5;
-    }
+    .g-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:11px 13px;font-size:.8rem;line-height:1.5;}
     .g-card .emoji{font-size:1.3rem;margin-bottom:3px}
     .g-card b{color:var(--text)}
     .g-card span{color:var(--muted)}
-
-    /* ── backend status badge ── */
-    .backend-badge{
-      font-size:.72rem;padding:3px 11px;border-radius:999px;
-      border:1px solid var(--border);color:var(--muted);
-      transition:all .3s;
-    }
+    .backend-badge{font-size:.72rem;padding:3px 11px;border-radius:999px;border:1px solid var(--border);color:var(--muted);transition:all .3s;}
     .backend-badge.online{border-color:#34d399;color:#34d399}
     .backend-badge.offline{border-color:#fb7185;color:#fb7185}
     .backend-badge.waking{border-color:#facc15;color:#facc15}
-
-    /* ── toast ── */
-    .toast{
-      position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(16px);
-      background:var(--surface2);border:1px solid var(--border);border-radius:999px;
-      padding:7px 18px;font-size:.78rem;color:var(--text);z-index:60;
-      opacity:0;transition:all .3s;pointer-events:none;max-width:90vw;text-align:center;
-    }
+    .toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:7px 18px;font-size:.78rem;color:var(--text);z-index:60;opacity:0;transition:all .3s;pointer-events:none;max-width:90vw;text-align:center;}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
     .toast.error{border-color:var(--erase);color:var(--erase)}
-
     @media(max-width:700px){.legend{display:none}.modes{right:10px;top:66px}.stats-hud{display:none}}
   </style>
 </head>
 <body>
 
-<!-- Top Bar -->
 <div class="topbar">
   <div class="brand"><div class="brand-dot"></div>Air Drawing Studio</div>
   <div class="stats-hud">
@@ -216,7 +107,6 @@
   </div>
 </div>
 
-<!-- Gesture Legend -->
 <div class="panel legend">
   <div class="legend-title">✋ Gestures</div>
   <div class="legend-row"><div class="lg-dot" style="background:var(--draw)"></div>Index only → Draw</div>
@@ -225,13 +115,11 @@
   <div class="legend-row"><div class="lg-dot" style="background:var(--idle)"></div>Fist / other → Idle</div>
 </div>
 
-<!-- Hand Mode -->
 <div class="panel modes">
   <div class="mode-row"><div class="mdot" id="leftDot"></div><span id="leftText">Left: —</span></div>
   <div class="mode-row"><div class="mdot" id="rightDot"></div><span id="rightText">Right: —</span></div>
 </div>
 
-<!-- Color Picker Popup -->
 <div class="color-popup" id="colorPopup">
   <button class="color-popup-close" id="closePopup">✕</button>
   <input type="color" id="nativeColorPicker" value="#a78bfa">
@@ -241,9 +129,7 @@
   </div>
 </div>
 
-<!-- Bottom Toolbar -->
 <div class="toolbar">
-  <!-- Color swatches -->
   <div class="colors" id="colorRow">
     <div class="sw active" style="background:#a78bfa" data-color="#a78bfa"></div>
     <div class="sw" style="background:#34d399" data-color="#34d399"></div>
@@ -254,55 +140,39 @@
     <div class="sw" style="background:#ffffff" data-color="#ffffff"></div>
     <div class="sw-custom" id="openColorPicker" title="Custom color">🎨</div>
   </div>
-
   <div class="divider"></div>
-
-  <!-- Brush shapes -->
   <div class="brush-group">
     <button class="brush-btn active" data-brush="round">●</button>
     <button class="brush-btn" data-brush="square">■</button>
     <button class="brush-btn" data-brush="spray">✦</button>
     <button class="brush-btn" data-brush="calligraphy">✒</button>
   </div>
-
   <div class="divider"></div>
-
-  <!-- Size slider -->
   <div class="slider-group">
     <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/></svg>
     <input type="range" id="brushSize" min="2" max="30" value="5">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
   </div>
-
   <div class="divider"></div>
-
-  <!-- Opacity slider -->
   <div class="slider-group">
     <span style="font-size:.7rem">α</span>
     <input type="range" id="opacitySlider" min="10" max="100" value="100">
     <span id="opacityVal" style="font-size:.7rem;min-width:28px">100%</span>
   </div>
-
   <div class="divider"></div>
-
-  <!-- Background themes -->
   <div class="bg-group">
     <button class="bg-btn active" data-bg="dark">🌑</button>
     <button class="bg-btn" data-bg="light">☀️</button>
     <button class="bg-btn" data-bg="grid">⊞</button>
     <button class="bg-btn" data-bg="chalk">🟫</button>
   </div>
-
   <div class="divider"></div>
-
-  <!-- Actions -->
   <button class="btn danger" id="clearBtn">Clear</button>
   <button class="btn" id="undoBtn">Undo</button>
   <button class="btn" id="saveImgBtn">Save PNG</button>
   <button class="btn success" id="saveSessionBtn">Save Session</button>
 </div>
 
-<!-- Canvas layers -->
 <div class="app">
   <canvas id="bgCanvas"></canvas>
   <video id="video" playsinline></video>
@@ -313,7 +183,6 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- Start Overlay -->
 <div class="overlay" id="overlay">
   <div class="big-title">Air Drawing Studio</div>
   <div class="sub">Draw in the air with your hands — skeleton tracked live, particles follow your fingertip, full brush control.</div>
@@ -329,80 +198,38 @@
 <script>
 const API_BASE = 'https://air-drawing-api.onrender.com';
 
-// ── Backend wake-up ping ──────────────────────────────────────────────────────
-const badge = document.getElementById('backendBadge');
-let backendOnline = false;
-
-async function pingBackend(retries = 8, delay = 4000) {
-  badge.className = 'backend-badge waking';
-  badge.textContent = '⏳ Waking backend…';
-  for (let i = 0; i < retries; i++) {
-    try {
-      const res = await fetch(API_BASE + '/health', { signal: AbortSignal.timeout(5000) });
-      if (res.ok) {
-        backendOnline = true;
-        badge.className = 'backend-badge online';
-        badge.textContent = '🟢 Backend online';
-        return;
-      }
-    } catch (_) { /* still waking */ }
-    await new Promise(r => setTimeout(r, delay));
-  }
-  backendOnline = false;
-  badge.className = 'backend-badge offline';
-  badge.textContent = '🔴 Backend offline';
-}
-pingBackend();
-
-// ── State
+// ── State (declared first so nothing depends on undefined vars)
 const state = {
-  color: '#a78bfa',
-  size: 5,
-  opacity: 1.0,
-  brush: 'round',
-  bg: 'dark',
-  strokes: [],
-  current: null,
-  moving: null,
+  color: '#a78bfa', size: 5, opacity: 1.0, brush: 'round', bg: 'dark',
+  strokes: [], current: null, moving: null,
   lastPinch: { Left: null, Right: null },
-  particles: [],
-  frameCount: 0,
-  fps: 0,
-  lastFpsTime: performance.now(),
-  handsVisible: 0
+  particles: [], frameCount: 0, fps: 0,
+  lastFpsTime: performance.now(), handsVisible: 0
 };
 
 // ── Canvas setup
-const video   = document.getElementById('video');
-const bgCv    = document.getElementById('bgCanvas');
-const dCv     = document.getElementById('drawCanvas');
-const pCv     = document.getElementById('particleCanvas');
-const sCv     = document.getElementById('skeletonCanvas');
-const bgCtx   = bgCv.getContext('2d');
-const dCtx    = dCv.getContext('2d');
-const pCtx    = pCv.getContext('2d');
-const sCtx    = sCv.getContext('2d');
+const video = document.getElementById('video');
+const bgCv  = document.getElementById('bgCanvas');
+const dCv   = document.getElementById('drawCanvas');
+const pCv   = document.getElementById('particleCanvas');
+const sCv   = document.getElementById('skeletonCanvas');
+const bgCtx = bgCv.getContext('2d');
+const dCtx  = dCv.getContext('2d');
+const pCtx  = pCv.getContext('2d');
+const sCtx  = sCv.getContext('2d');
 
-function resize(){
-  [bgCv,dCv,pCv,sCv].forEach(c=>{ c.width=innerWidth; c.height=innerHeight; });
-  drawBg();
-  redraw();
-}
-addEventListener('resize', resize);
-resize();
-
-// ── Background themes
+// ── Background themes (MUST be defined before resize/drawBg)
 const BG_THEMES = {
-  dark:  ()=>{ bgCtx.fillStyle='#0a0a10'; bgCtx.fillRect(0,0,bgCv.width,bgCv.height); },
-  light: ()=>{ bgCtx.fillStyle='#f8f8f5'; bgCtx.fillRect(0,0,bgCv.width,bgCv.height); },
-  grid:  ()=>{
+  dark:  () => { bgCtx.fillStyle='#0a0a10'; bgCtx.fillRect(0,0,bgCv.width,bgCv.height); },
+  light: () => { bgCtx.fillStyle='#f8f8f5'; bgCtx.fillRect(0,0,bgCv.width,bgCv.height); },
+  grid:  () => {
     bgCtx.fillStyle='#0d0d18'; bgCtx.fillRect(0,0,bgCv.width,bgCv.height);
     bgCtx.strokeStyle='rgba(100,100,180,0.18)'; bgCtx.lineWidth=1;
     const step=40;
     for(let x=0;x<bgCv.width;x+=step){ bgCtx.beginPath();bgCtx.moveTo(x,0);bgCtx.lineTo(x,bgCv.height);bgCtx.stroke(); }
     for(let y=0;y<bgCv.height;y+=step){ bgCtx.beginPath();bgCtx.moveTo(0,y);bgCtx.lineTo(bgCv.width,y);bgCtx.stroke(); }
   },
-  chalk: ()=>{
+  chalk: () => {
     bgCtx.fillStyle='#2c1810'; bgCtx.fillRect(0,0,bgCv.width,bgCv.height);
     for(let i=0;i<3000;i++){
       bgCtx.fillStyle=`rgba(255,220,180,${Math.random()*0.025})`;
@@ -410,7 +237,21 @@ const BG_THEMES = {
     }
   }
 };
-function drawBg(){ BG_THEMES[state.bg](); }
+
+function drawBg() { BG_THEMES[state.bg](); }
+
+function redraw(){
+  dCtx.clearRect(0,0,dCv.width,dCv.height);
+  state.strokes.forEach(drawStroke);
+}
+
+function resize(){
+  [bgCv,dCv,pCv,sCv].forEach(c=>{ c.width=innerWidth; c.height=innerHeight; });
+  drawBg();
+  redraw();
+}
+addEventListener('resize', resize);
+resize(); // safe now — BG_THEMES defined above
 
 // ── Brush stroke drawing
 function applyBrushToCtx(ctx, color, size, opacity){
@@ -428,21 +269,9 @@ function drawStroke(st){
   if(!st || st.points.length < 2) return;
   dCtx.save();
   applyBrushToCtx(dCtx, st.color, st.size, st.opacity);
-
-  if(st.brush === 'calligraphy'){
-    dCtx.lineWidth = st.size;
-    dCtx.setTransform(1, 0.3, 0, 1, 0, 0);
-  }
-  if(st.brush === 'square'){
-    dCtx.lineCap = 'square';
-    dCtx.lineJoin = 'miter';
-  }
-  if(st.brush === 'spray'){
-    dCtx.restore();
-    drawSprayStroke(st);
-    return;
-  }
-
+  if(st.brush === 'calligraphy'){ dCtx.lineWidth=st.size; dCtx.setTransform(1,0.3,0,1,0,0); }
+  if(st.brush === 'square'){ dCtx.lineCap='square'; dCtx.lineJoin='miter'; }
+  if(st.brush === 'spray'){ dCtx.restore(); drawSprayStroke(st); return; }
   dCtx.beginPath();
   dCtx.moveTo(st.points[0].x, st.points[0].y);
   for(let i=1;i<st.points.length;i++){
@@ -469,22 +298,10 @@ function drawSprayStroke(st){
   dCtx.restore();
 }
 
-function redraw(){
-  dCtx.clearRect(0,0,dCv.width,dCv.height);
-  state.strokes.forEach(drawStroke);
-}
-
 // ── Particles
 function spawnParticles(x, y, color){
   for(let i=0;i<5;i++){
-    state.particles.push({
-      x, y,
-      vx: (Math.random()-0.5)*3.5,
-      vy: (Math.random()-0.5)*3.5,
-      life: 1.0,
-      size: Math.random()*4+2,
-      color
-    });
+    state.particles.push({ x, y, vx:(Math.random()-.5)*3.5, vy:(Math.random()-.5)*3.5, life:1.0, size:Math.random()*4+2, color });
   }
 }
 
@@ -492,18 +309,11 @@ function updateParticles(){
   pCtx.clearRect(0,0,pCv.width,pCv.height);
   state.particles = state.particles.filter(p=>p.life>0.02);
   state.particles.forEach(p=>{
-    p.x += p.vx;
-    p.y += p.vy;
-    p.vy += 0.08;
-    p.life *= 0.88;
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.08; p.life*=0.88;
     pCtx.save();
-    pCtx.globalAlpha = p.life * 0.9;
-    pCtx.fillStyle = p.color;
-    pCtx.shadowBlur = 8;
-    pCtx.shadowColor = p.color;
-    pCtx.beginPath();
-    pCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI*2);
-    pCtx.fill();
+    pCtx.globalAlpha=p.life*0.9; pCtx.fillStyle=p.color;
+    pCtx.shadowBlur=8; pCtx.shadowColor=p.color;
+    pCtx.beginPath(); pCtx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2); pCtx.fill();
     pCtx.restore();
   });
 }
@@ -511,24 +321,19 @@ function updateParticles(){
 // ── Stats HUD
 function updateStats(){
   document.getElementById('statStrokes').textContent = state.strokes.length;
-  document.getElementById('statPoints').textContent = state.strokes.reduce((a,s)=>a+s.points.length,0);
-  document.getElementById('statHands').textContent  = state.handsVisible;
+  document.getElementById('statPoints').textContent  = state.strokes.reduce((a,s)=>a+s.points.length,0);
+  document.getElementById('statHands').textContent   = state.handsVisible;
   state.frameCount++;
   const now = performance.now();
   if(now - state.lastFpsTime >= 1000){
-    state.fps = state.frameCount;
-    state.frameCount = 0;
-    state.lastFpsTime = now;
+    state.fps = state.frameCount; state.frameCount = 0; state.lastFpsTime = now;
     document.getElementById('statFps').textContent = state.fps;
   }
 }
 
 // ── Gesture detection
 const TIPS=[4,8,12,16,20], PIPS=[3,6,10,14,18];
-function fingerUp(lm,f){
-  if(f===0) return Math.abs(lm[4].x-lm[2].x)>0.05;
-  return lm[TIPS[f]].y < lm[PIPS[f]].y;
-}
+function fingerUp(lm,f){ if(f===0) return Math.abs(lm[4].x-lm[2].x)>0.05; return lm[TIPS[f]].y < lm[PIPS[f]].y; }
 function detectGesture(lm){
   const fs=[0,1,2,3,4].map(i=>fingerUp(lm,i));
   const ext=fs.filter(Boolean).length;
@@ -547,11 +352,8 @@ function renderSkeleton(lm, gesture, label){
   const pts=lm.map(l=>({x:(1-l.x)*sCv.width,y:l.y*sCv.height}));
   const c=GCOL[gesture]||'#60a5fa';
   sCtx.save();
-  sCtx.strokeStyle=c; sCtx.lineWidth=2;
-  sCtx.shadowBlur=8; sCtx.shadowColor=c;
-  CONNS.forEach(([a,b])=>{
-    sCtx.beginPath(); sCtx.moveTo(pts[a].x,pts[a].y); sCtx.lineTo(pts[b].x,pts[b].y); sCtx.stroke();
-  });
+  sCtx.strokeStyle=c; sCtx.lineWidth=2; sCtx.shadowBlur=8; sCtx.shadowColor=c;
+  CONNS.forEach(([a,b])=>{ sCtx.beginPath(); sCtx.moveTo(pts[a].x,pts[a].y); sCtx.lineTo(pts[b].x,pts[b].y); sCtx.stroke(); });
   pts.forEach((p,i)=>{
     const tip=TIPS.includes(i);
     sCtx.beginPath(); sCtx.arc(p.x,p.y,tip?6:3,0,Math.PI*2);
@@ -590,25 +392,17 @@ function onResults(results){
   sCtx.clearRect(0,0,sCv.width,sCv.height);
   const seen={Left:false,Right:false};
   state.handsVisible = results.multiHandLandmarks ? results.multiHandLandmarks.length : 0;
-
   if(results.multiHandLandmarks?.length){
     for(let i=0;i<results.multiHandLandmarks.length;i++){
       const lm=results.multiHandLandmarks[i];
       const hand=results.multiHandedness[i].label;
       seen[hand]=true;
       const g=detectGesture(lm);
-      setMode(hand,g);
-      renderSkeleton(lm,g,hand);
-
-      const idx=lmPx(lm[8]);
-      const thumb=lmPx(lm[4]);
+      setMode(hand,g); renderSkeleton(lm,g,hand);
+      const idx=lmPx(lm[8]), thumb=lmPx(lm[4]);
       const mid={x:(idx.x+thumb.x)/2,y:(idx.y+thumb.y)/2};
-
       if(g==='DRAW'){
-        if(!state.current){
-          state.current={color:state.color,size:state.size,opacity:state.opacity,brush:state.brush,points:[]};
-          state.strokes.push(state.current);
-        }
+        if(!state.current){ state.current={color:state.color,size:state.size,opacity:state.opacity,brush:state.brush,points:[]}; state.strokes.push(state.current); }
         state.current.points.push({...idx});
         spawnParticles(idx.x, idx.y, state.color);
         const pts=state.current.points;
@@ -618,58 +412,31 @@ function onResults(results){
           if(state.current.brush==='square'){dCtx.lineCap='square';dCtx.lineJoin='miter';}
           if(state.current.brush==='calligraphy'){dCtx.setTransform(1,0.3,0,1,0,0);}
           if(state.current.brush!=='spray'){
-            dCtx.beginPath();
-            dCtx.moveTo(pts.at(-2).x,pts.at(-2).y);
-            dCtx.lineTo(pts.at(-1).x,pts.at(-1).y);
-            dCtx.stroke();
+            dCtx.beginPath(); dCtx.moveTo(pts.at(-2).x,pts.at(-2).y); dCtx.lineTo(pts.at(-1).x,pts.at(-1).y); dCtx.stroke();
           } else {
-            const p=pts.at(-1);
-            dCtx.globalAlpha=state.current.opacity*0.15;
-            dCtx.fillStyle=state.current.color;
-            for(let k=0;k<10;k++){
-              const angle=Math.random()*Math.PI*2;
-              const r=Math.random()*state.current.size*1.8;
-              dCtx.beginPath();
-              dCtx.arc(p.x+Math.cos(angle)*r,p.y+Math.sin(angle)*r,1.5,0,Math.PI*2);
-              dCtx.fill();
-            }
+            const p=pts.at(-1); dCtx.globalAlpha=state.current.opacity*0.15; dCtx.fillStyle=state.current.color;
+            for(let k=0;k<10;k++){ const angle=Math.random()*Math.PI*2,r=Math.random()*state.current.size*1.8; dCtx.beginPath(); dCtx.arc(p.x+Math.cos(angle)*r,p.y+Math.sin(angle)*r,1.5,0,Math.PI*2); dCtx.fill(); }
           }
           dCtx.restore();
         }
-        state.lastPinch[hand]=null;
-        state.moving=null;
-      }
-      else if(g==='ERASE'){
+        state.lastPinch[hand]=null; state.moving=null;
+      } else if(g==='ERASE'){
         state.current=null; state.moving=null;
         eraseNear(lmPx(lm[9]).x, lmPx(lm[9]).y);
-      }
-      else if(g==='PINCH'){
+      } else if(g==='PINCH'){
         state.current=null;
-        if(!state.lastPinch[hand]){
-          state.moving=findStroke(mid.x,mid.y);
-          state.lastPinch[hand]={...mid};
-        } else if(state.moving!==null){
-          const dx=mid.x-state.lastPinch[hand].x;
-          const dy=mid.y-state.lastPinch[hand].y;
-          if(state.strokes[state.moving]){
-            state.strokes[state.moving].points=state.strokes[state.moving].points.map(p=>({x:p.x+dx,y:p.y+dy}));
-            redraw();
-          }
+        if(!state.lastPinch[hand]){ state.moving=findStroke(mid.x,mid.y); state.lastPinch[hand]={...mid}; }
+        else if(state.moving!==null){
+          const dx=mid.x-state.lastPinch[hand].x, dy=mid.y-state.lastPinch[hand].y;
+          if(state.strokes[state.moving]){ state.strokes[state.moving].points=state.strokes[state.moving].points.map(p=>({x:p.x+dx,y:p.y+dy})); redraw(); }
           state.lastPinch[hand]={...mid};
         }
-      }
-      else{
-        state.current=null;
-        state.lastPinch[hand]=null;
-        state.moving=null;
-      }
+      } else { state.current=null; state.lastPinch[hand]=null; state.moving=null; }
     }
   }
-  if(!seen.Left)  setMode('Left','IDLE');
+  if(!seen.Left) setMode('Left','IDLE');
   if(!seen.Right) setMode('Right','IDLE');
-
-  updateParticles();
-  updateStats();
+  updateParticles(); updateStats();
 }
 
 // ── Toast
@@ -681,125 +448,95 @@ function showToast(msg, ms=2600, isError=false){
   t._timer = setTimeout(()=>{ t.className='toast'; }, ms);
 }
 
-// ── Start camera (with full error handling)
+// ── Backend ping
+const badge = document.getElementById('backendBadge');
+let backendOnline = false;
+async function pingBackend(retries=8, delay=4000){
+  badge.className='backend-badge waking'; badge.textContent='⏳ Waking backend…';
+  for(let i=0;i<retries;i++){
+    try{
+      const res=await fetch(API_BASE+'/health',{signal:AbortSignal.timeout(5000)});
+      if(res.ok){ backendOnline=true; badge.className='backend-badge online'; badge.textContent='🟢 Backend online'; return; }
+    } catch(_){ }
+    await new Promise(r=>setTimeout(r,delay));
+  }
+  backendOnline=false; badge.className='backend-badge offline'; badge.textContent='🔴 Backend offline';
+}
+pingBackend();
+
+// ── Start camera
 async function startCamera(){
-  const btn = document.getElementById('startBtn');
-
-  // Must be HTTPS or localhost for camera access
-  if(location.protocol !== 'https:' && location.hostname !== 'localhost'){
-    showToast('❌ Camera needs HTTPS. Use the Vercel link!', 5000, true);
-    return;
+  const btn=document.getElementById('startBtn');
+  if(location.protocol!=='https:'&&location.hostname!=='localhost'){
+    showToast('❌ Camera needs HTTPS!',5000,true); return;
   }
-
-  // Check if MediaPipe loaded
-  if(typeof Hands === 'undefined'){
-    showToast('⏳ MediaPipe still loading, please wait a moment…', 4000, true);
-    return;
+  if(typeof Hands==='undefined'){
+    showToast('⏳ MediaPipe still loading…',4000,true); return;
   }
-
-  btn.textContent = 'Loading…';
-  btn.disabled = true;
-
-  try {
-    // Request camera
-    const stream = await navigator.mediaDevices.getUserMedia({video:{width:1280,height:720}});
-    video.srcObject = stream;
-    await video.play();
-    video.classList.add('on');
-    document.getElementById('camStatus').textContent = '🟢 Camera active';
-
-    // Init MediaPipe Hands
-    const hands = new Hands({locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`});
-    hands.setOptions({maxNumHands:2, modelComplexity:1, minDetectionConfidence:0.7, minTrackingConfidence:0.6});
+  btn.textContent='Loading…'; btn.disabled=true;
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:{width:1280,height:720}});
+    video.srcObject=stream; await video.play(); video.classList.add('on');
+    document.getElementById('camStatus').textContent='🟢 Camera active';
+    const hands=new Hands({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`});
+    hands.setOptions({maxNumHands:2,modelComplexity:1,minDetectionConfidence:0.7,minTrackingConfidence:0.6});
     hands.onResults(onResults);
-
-    const camera = new Camera(video, {
-      onFrame: async () => await hands.send({image: video}),
-      width: 1280,
-      height: 720
-    });
+    const camera=new Camera(video,{onFrame:async()=>await hands.send({image:video}),width:1280,height:720});
     await camera.start();
-
     document.getElementById('overlay').classList.add('hidden');
     showToast('Camera started — show your hands! ✋');
-
-  } catch(err) {
-    btn.textContent = '🎥 Start Camera';
-    btn.disabled = false;
-
-    if(err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'){
-      showToast('❌ Camera permission denied! Allow camera in browser settings.', 5000, true);
-    } else if(err.name === 'NotFoundError'){
-      showToast('❌ No camera found on this device.', 5000, true);
-    } else if(err.name === 'NotReadableError'){
-      showToast('❌ Camera is in use by another app. Close it and retry.', 5000, true);
-    } else {
-      showToast('❌ Error: ' + err.message, 5000, true);
-      console.error('Camera/MediaPipe error:', err);
-    }
+  } catch(err){
+    btn.textContent='🎥 Start Camera'; btn.disabled=false;
+    if(err.name==='NotAllowedError'||err.name==='PermissionDeniedError') showToast('❌ Camera permission denied! Allow it in browser settings.',5000,true);
+    else if(err.name==='NotFoundError') showToast('❌ No camera found.',5000,true);
+    else if(err.name==='NotReadableError') showToast('❌ Camera in use by another app.',5000,true);
+    else { showToast('❌ Error: '+err.message,5000,true); console.error(err); }
   }
 }
 
-// ── Controls: Start
-document.getElementById('startBtn').addEventListener('click', startCamera);
+document.getElementById('startBtn').addEventListener('click',startCamera);
 
 // ── Color swatches
 document.getElementById('colorRow').addEventListener('click',e=>{
-  const sw=e.target.closest('.sw');
-  if(!sw) return;
+  const sw=e.target.closest('.sw'); if(!sw) return;
   document.querySelectorAll('.sw').forEach(s=>s.classList.remove('active'));
-  sw.classList.add('active');
-  state.color=sw.dataset.color;
+  sw.classList.add('active'); state.color=sw.dataset.color;
   document.getElementById('nativeColorPicker').value=state.color;
   document.getElementById('hexInput').value=state.color;
 });
 
 // ── Custom color picker
 const colorPopup=document.getElementById('colorPopup');
-document.getElementById('openColorPicker').addEventListener('click',()=>{
-  colorPopup.classList.toggle('open');
-});
+document.getElementById('openColorPicker').addEventListener('click',()=>colorPopup.classList.toggle('open'));
 document.getElementById('closePopup').addEventListener('click',()=>colorPopup.classList.remove('open'));
-document.getElementById('nativeColorPicker').addEventListener('input',e=>{
-  document.getElementById('hexInput').value=e.target.value;
-});
+document.getElementById('nativeColorPicker').addEventListener('input',e=>document.getElementById('hexInput').value=e.target.value);
 document.getElementById('applyColor').addEventListener('click',()=>{
   let hex=document.getElementById('hexInput').value.trim();
   if(!/^#[0-9a-fA-F]{6}$/.test(hex)) hex=document.getElementById('nativeColorPicker').value;
   state.color=hex;
   document.querySelectorAll('.sw').forEach(s=>s.classList.remove('active'));
-  colorPopup.classList.remove('open');
-  showToast('Color set to '+hex);
+  colorPopup.classList.remove('open'); showToast('Color set to '+hex);
 });
 
-// ── Brush shape
+// ── Brush
 document.querySelectorAll('.brush-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.brush-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    state.brush=btn.dataset.brush;
-    showToast('Brush: '+state.brush);
+    btn.classList.add('active'); state.brush=btn.dataset.brush; showToast('Brush: '+state.brush);
   });
 });
 
-// ── Size slider
-document.getElementById('brushSize').addEventListener('input',e=>{
-  state.size=parseInt(e.target.value);
-});
-
-// ── Opacity slider
+document.getElementById('brushSize').addEventListener('input',e=>state.size=parseInt(e.target.value));
 document.getElementById('opacitySlider').addEventListener('input',e=>{
   state.opacity=parseInt(e.target.value)/100;
   document.getElementById('opacityVal').textContent=e.target.value+'%';
 });
 
-// ── Background themes
+// ── Background
 document.querySelectorAll('.bg-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.bg-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    state.bg=btn.dataset.bg;
-    drawBg();
+    btn.classList.add('active'); state.bg=btn.dataset.bg; drawBg();
     const isLight=state.bg==='light';
     document.documentElement.style.setProperty('--text',isLight?'#1a1a2e':'#ececf6');
     document.documentElement.style.setProperty('--muted',isLight?'#555577':'#9ea0b8');
@@ -807,51 +544,23 @@ document.querySelectorAll('.bg-btn').forEach(btn=>{
   });
 });
 
-// ── Clear
-document.getElementById('clearBtn').addEventListener('click',()=>{
-  state.strokes=[]; state.current=null;
-  redraw(); showToast('Canvas cleared');
-});
+document.getElementById('clearBtn').addEventListener('click',()=>{ state.strokes=[]; state.current=null; redraw(); showToast('Canvas cleared'); });
+document.getElementById('undoBtn').addEventListener('click',()=>{ if(!state.strokes.length) return; state.strokes.pop(); state.current=null; redraw(); showToast('Undone'); });
 
-// ── Undo
-document.getElementById('undoBtn').addEventListener('click',()=>{
-  if(!state.strokes.length) return;
-  state.strokes.pop(); state.current=null;
-  redraw(); showToast('Undone');
-});
-
-// ── Save PNG
 document.getElementById('saveImgBtn').addEventListener('click',()=>{
-  const out=document.createElement('canvas');
-  out.width=dCv.width; out.height=dCv.height;
-  const c=out.getContext('2d');
-  c.drawImage(bgCv,0,0);
-  c.drawImage(dCv,0,0);
-  out.toBlob(blob=>{
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download=`air-drawing-${Date.now()}.png`;
-    a.click();
-  });
+  const out=document.createElement('canvas'); out.width=dCv.width; out.height=dCv.height;
+  const c=out.getContext('2d'); c.drawImage(bgCv,0,0); c.drawImage(dCv,0,0);
+  out.toBlob(blob=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`air-drawing-${Date.now()}.png`; a.click(); });
   showToast('PNG saved! 🖼️');
 });
 
-// ── Save Session
 document.getElementById('saveSessionBtn').addEventListener('click',async()=>{
   if(!state.strokes.length){showToast('Nothing to save yet.');return;}
-  if(!backendOnline){showToast('Backend still waking up, please wait…');return;}
+  if(!backendOnline){showToast('Backend still waking up…');return;}
   try{
-    const res=await fetch(API_BASE+'/api/sessions',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({name:'session-'+Date.now(),strokes:state.strokes,created_at:new Date().toISOString()})
-    });
-    const data=await res.json();
-    showToast('Session saved! ID: '+data.id);
-  } catch(err){
-    showToast('Save failed — retrying backend…');
-    pingBackend(3, 2000);
-  }
+    const res=await fetch(API_BASE+'/api/sessions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'session-'+Date.now(),strokes:state.strokes,created_at:new Date().toISOString()})});
+    const data=await res.json(); showToast('Session saved! ID: '+data.id);
+  } catch(err){ showToast('Save failed — retrying…'); pingBackend(3,2000); }
 });
 </script>
 </body>

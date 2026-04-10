@@ -24,10 +24,11 @@ app = FastAPI(
     description="Backend for Air Drawing Studio — hand gesture drawing app",
 )
 
-# ─── CORS: explicitly list allowed origins ────────────────────────────────────
+# ─── CORS: explicitly list allowed origins ────────────────────────────────────────────────────
 ALLOWED_ORIGINS = [
-    "https://air-drawing-frontend.onrender.com",
-    "https://newgesture-2.onrender.com",
+    "https://newgesture.vercel.app",         # Vercel production
+    "https://air-drawing-frontend.onrender.com",  # Render frontend
+    "https://newgesture-2.onrender.com",     # Render legacy
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:5500",
@@ -43,7 +44,7 @@ app.add_middleware(
 )
 
 
-# ─── Models ─────────────────────────────────────────────────────────────────
+# ─── Models ───────────────────────────────────────────────────────────────────────────
 class StrokePoint(BaseModel):
     x: float
     y: float
@@ -65,7 +66,7 @@ class SessionOut(SessionIn):
     id: str
 
 
-# ─── WebSocket Manager ──────────────────────────────────────────────────────
+# ─── WebSocket Manager ────────────────────────────────────────────────────────────────────
 class ConnectionManager:
     def __init__(self) -> None:
         self.active: list[WebSocket] = []
@@ -92,7 +93,7 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
-# ─── JSON storage helpers ────────────────────────────────────────────────────
+# ─── JSON storage helpers ────────────────────────────────────────────────────────────────────
 def read_sessions() -> list[dict[str, Any]]:
     if not SESSIONS_FILE.exists():
         return []
@@ -108,7 +109,7 @@ def write_sessions(items: list[dict[str, Any]]) -> None:
     )
 
 
-# ─── Routes ─────────────────────────────────────────────────────────────────
+# ─── Routes ─────────────────────────────────────────────────────────────────────────────
 @app.get("/")
 def root() -> dict[str, str]:
     return {"message": "Air Drawing API — running 🎨", "docs": "/docs"}
