@@ -349,36 +349,155 @@
     .badge-yellow { background: rgba(250,204,21,.15); color: #facc15; }
     .badge-cyan   { background: rgba(6,182,212,.15); color: #06b6d4; }
 
-    /* ── COLLAB SECTION ── */
+    /* ── COLLABORATE SECTION ── */
     .collab-section {
       max-width: 1200px;
       margin: 0 auto;
       padding: 80px clamp(20px,5vw,80px);
     }
-    .collab-grid {
+    .collab-intro {
+      margin-bottom: 52px;
+    }
+    .collab-intro .section-sub {
+      margin-top: 8px;
+    }
+
+    /* Two-col layout: left = description + live count, right = room cards */
+    .collab-layout {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-      margin-top: 48px;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 48px;
+      align-items: start;
     }
-    @media(max-width:768px) { .collab-grid { grid-template-columns:1fr; } }
-    .collab-card {
-      background: rgba(13,13,13,0.7);
-      backdrop-filter: blur(12px);
+    @media(max-width: 900px) { .collab-layout { grid-template-columns: 1fr; } }
+
+    .collab-desc {
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .collab-desc p {
+      color: var(--muted); font-size: .95rem; line-height: 1.8;
+    }
+    .live-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(52,211,153,.08);
+      border: 1px solid rgba(52,211,153,.2);
+      color: #34d399; font-size: .78rem; font-weight: 600;
+      letter-spacing: .06em; text-transform: uppercase;
+      padding: 6px 16px; border-radius: 999px;
+      width: fit-content;
+    }
+    .live-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #34d399;
+      animation: livePulse 1.4s ease-in-out infinite;
+    }
+    @keyframes livePulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50% { opacity:.5; transform:scale(1.4); }
+    }
+    .how-collab {
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .how-collab-step {
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .hcs-num {
+      width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: .72rem; font-weight: 800;
+    }
+    .hcs-text { font-size: .88rem; color: var(--muted); line-height: 1.6; padding-top: 3px; }
+    .hcs-text b { color: var(--text); font-weight: 600; }
+
+    /* Room cards on the right */
+    .room-cards {
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .room-card {
+      background: rgba(13,13,13,0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       border: 1px solid rgba(255,255,255,.07);
-      border-radius: 20px;
-      padding: 32px;
+      border-radius: 20px; padding: 28px 28px 24px;
       transition: all .3s;
+      position: relative; overflow: hidden;
     }
-    .collab-card:hover { border-color: rgba(139,92,246,.3); transform: translateY(-3px); }
-    .collab-card h3 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; letter-spacing: -.02em; }
-    .collab-card p { color: var(--muted); font-size: .9rem; line-height: 1.7; margin-bottom: 20px; }
-    .collab-link {
+    .room-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(139,92,246,.05), transparent);
+      opacity: 0; transition: opacity .3s;
+    }
+    .room-card:hover { border-color: rgba(139,92,246,.3); transform: translateY(-3px); box-shadow: 0 16px 44px rgba(0,0,0,.55); }
+    .room-card:hover::before { opacity: 1; }
+
+    .room-card-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+    }
+    .room-card-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+    }
+    .room-card-header h3 {
+      font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+      letter-spacing: -.01em;
+    }
+    .room-card-header p {
+      color: var(--muted); font-size: .8rem; margin-top: 2px;
+    }
+    .room-card-body {
+      display: flex; gap: 10px; align-items: center;
+    }
+    .room-input {
+      flex: 1; background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px; padding: 10px 14px;
+      color: var(--text); font-size: .88rem; font-family: var(--font-body);
+      outline: none; transition: border-color .2s;
+    }
+    .room-input:focus { border-color: rgba(139,92,246,.5); background: rgba(139,92,246,.05); }
+    .room-input::placeholder { color: rgba(156,163,175,.5); }
+    .room-btn {
       display: inline-flex; align-items: center; gap: 6px;
-      color: #a78bfa; font-size: .85rem; font-weight: 600;
-      text-decoration: none; transition: gap .2s;
+      font-family: var(--font-body); font-weight: 700; font-size: .85rem;
+      border: none; cursor: pointer; border-radius: 10px; padding: 10px 18px;
+      transition: all .2s; white-space: nowrap;
     }
-    .collab-link:hover { gap: 10px; }
+    .room-btn-create {
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color: #fff;
+      box-shadow: 0 0 18px rgba(139,92,246,.35);
+    }
+    .room-btn-create:hover { transform: translateY(-1px); box-shadow: 0 0 28px rgba(139,92,246,.6); }
+    .room-btn-join {
+      background: rgba(52,211,153,.12);
+      border: 1px solid rgba(52,211,153,.25);
+      color: #34d399;
+    }
+    .room-btn-join:hover { background: rgba(52,211,153,.2); transform: translateY(-1px); }
+
+    /* Room code display after creation */
+    .room-code-display {
+      display: none;
+      margin-top: 14px;
+      background: rgba(139,92,246,.08);
+      border: 1px solid rgba(139,92,246,.2);
+      border-radius: 10px; padding: 12px 16px;
+      align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .room-code-display.show { display: flex; }
+    .room-code-val {
+      font-family: 'Courier New', monospace; font-size: 1.3rem; font-weight: 700;
+      letter-spacing: .2em; color: #a78bfa;
+    }
+    .copy-btn {
+      background: rgba(139,92,246,.15); border: 1px solid rgba(139,92,246,.25);
+      color: #a78bfa; border-radius: 8px; padding: 6px 12px;
+      font-size: .75rem; font-weight: 600; cursor: pointer;
+      transition: all .2s; font-family: var(--font-body);
+    }
+    .copy-btn:hover { background: rgba(139,92,246,.28); }
+    .copy-btn.copied { color: #34d399; border-color: rgba(52,211,153,.3); background: rgba(52,211,153,.1); }
 
     /* ── TECH STACK ── */
     .tech-section {
@@ -610,19 +729,80 @@
 
 <!-- COLLABORATE -->
 <div class="collab-section reveal" id="collab">
-  <div class="section-tag">Open Source</div>
-  <h2 class="section-title">Built to be built upon.</h2>
-  <p class="section-sub" style="margin-bottom:0">AirDraw is fully open source. Fork it, extend it, build something new on top of it — or reach out and let's create something together.</p>
-  <div class="collab-grid">
-    <div class="collab-card">
-      <h3>🍴 Fork & Contribute</h3>
-      <p>The full codebase lives on GitHub. Found a bug? Have a feature in mind? Pull requests and issues are always open — no contribution is too small to matter.</p>
-      <a href="https://github.com/koyeliya2004/newgesture" class="collab-link" target="_blank" rel="noopener">View on GitHub →</a>
+  <div class="collab-intro">
+    <div class="section-tag">Collaborate</div>
+    <h2 class="section-title">Draw together,<br>in real-time.</h2>
+    <p class="section-sub">Your friend opens this app and enters your room code — that's it. No accounts, no setup. Just two hands on the same canvas.</p>
+  </div>
+
+  <div class="collab-layout">
+    <!-- Left: description + how it works -->
+    <div class="collab-desc">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        Live rooms · WebSocket powered
+      </div>
+      <p>Create a room and get a short shareable code. Send it to a friend. The moment they join, your canvases sync — every stroke, every gesture, every brushstroke in real time.</p>
+      <div class="how-collab">
+        <div class="how-collab-step">
+          <div class="hcs-num">1</div>
+          <div class="hcs-text"><b>Create a room</b> — you'll get a short code to share with your friend.</div>
+        </div>
+        <div class="how-collab-step">
+          <div class="hcs-num">2</div>
+          <div class="hcs-text"><b>Share the code</b> — send it over chat, message, anything.</div>
+        </div>
+        <div class="how-collab-step">
+          <div class="hcs-num">3</div>
+          <div class="hcs-text"><b>Draw together</b> — strokes appear live on both canvases instantly.</div>
+        </div>
+      </div>
     </div>
-    <div class="collab-card">
-      <h3>🤝 Let's Build Together</h3>
-      <p>Want to integrate AirDraw into your own project, co-develop a feature, or collaborate on something entirely new? Reach out directly — always open to interesting ideas.</p>
-      <a href="https://github.com/koyeliya2004" class="collab-link" target="_blank" rel="noopener">Connect on GitHub →</a>
+
+    <!-- Right: room action cards -->
+    <div class="room-cards">
+      <!-- Create Room -->
+      <div class="room-card">
+        <div class="room-card-header">
+          <div class="room-card-icon" style="background:rgba(139,92,246,.15)">✦</div>
+          <div>
+            <h3>Create a New Room</h3>
+            <p>Get a short code to share with your friend</p>
+          </div>
+        </div>
+        <div class="room-card-body">
+          <button class="room-btn room-btn-create" id="createRoomBtn" onclick="createRoom()">
+            ✦ Create Room
+          </button>
+        </div>
+        <div class="room-code-display" id="roomCodeDisplay">
+          <div>
+            <div style="font-size:.72rem;color:var(--muted);margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase;">Your Room Code</div>
+            <div class="room-code-val" id="roomCodeVal">——</div>
+          </div>
+          <button class="copy-btn" id="copyBtn" onclick="copyCode()">Copy</button>
+        </div>
+      </div>
+
+      <!-- Join Room -->
+      <div class="room-card">
+        <div class="room-card-header">
+          <div class="room-card-icon" style="background:rgba(52,211,153,.12)">🔗</div>
+          <div>
+            <h3>Join a Room</h3>
+            <p>Enter the code your friend shared with you</p>
+          </div>
+        </div>
+        <div class="room-card-body">
+          <input class="room-input" id="joinCodeInput" type="text" maxlength="6"
+            placeholder="Enter 6-digit code…"
+            oninput="this.value=this.value.toUpperCase()"
+            onkeydown="if(event.key==='Enter')joinRoom()" />
+          <button class="room-btn room-btn-join" onclick="joinRoom()">
+            🔗 Join
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -674,6 +854,48 @@
 </footer>
 
 </div><!-- end .page-body -->
+
+<script>
+/* ── ROOM LOGIC ── */
+function generateCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+function createRoom() {
+  const code = generateCode();
+  document.getElementById('roomCodeVal').textContent = code;
+  const disp = document.getElementById('roomCodeDisplay');
+  disp.classList.add('show');
+  const btn = document.getElementById('createRoomBtn');
+  btn.textContent = '✦ New Room';
+  const copyBtn = document.getElementById('copyBtn');
+  copyBtn.classList.remove('copied');
+  copyBtn.textContent = 'Copy';
+  // Navigate to app with room code as host
+  setTimeout(() => {
+    window.location.href = '/app.html?room=' + code + '&host=1';
+  }, 1200);
+}
+function copyCode() {
+  const code = document.getElementById('roomCodeVal').textContent;
+  if (code === '——') return;
+  navigator.clipboard.writeText(code).catch(() => {});
+  const btn = document.getElementById('copyBtn');
+  btn.textContent = 'Copied!';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+}
+function joinRoom() {
+  const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+  if (code.length < 4) {
+    document.getElementById('joinCodeInput').focus();
+    return;
+  }
+  window.location.href = '/app.html?room=' + code;
+}
+</script>
 
 <script>
 (function() {
@@ -802,16 +1024,16 @@
     const mesh=new THREE.Points(geo,mat);
     const grp=new THREE.Group();
     grp.add(mesh);
-    /* Shift hand to the right so it's clearly visible on laptop view */
-    grp.position.x = 5;
+    /* Hand centered in viewport */
+    grp.position.x = 0;
     scene.add(grp);
 
-    let mX=0,mY=0,tRX=0,tRY=0,tPX=5,tPY=0,tPZ=0;
+    let mX=0,mY=0,tRX=0,tRY=0,tPX=0,tPY=0,tPZ=0;
     function onInput(cx,cy){
         mX=(cx/window.innerWidth)*2-1;
         mY=-(cy/window.innerHeight)*2+1;
         tRY=mX*1.2; tRX=mY*.8;
-        tPX=5+mX*1.5; tPY=mY*1.5;
+        tPX=mX*1.5; tPY=mY*1.5;
         tPZ=Math.sqrt(mX*mX+mY*mY)*5;
     }
     document.addEventListener('mousemove',e=>onInput(e.clientX,e.clientY));
