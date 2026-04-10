@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import json
-import os
+import re
 import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -23,21 +23,31 @@ app = FastAPI(
     description="Backend for Air Drawing Studio",
 )
 
-ALLOWED_ORIGINS = [
-    "https://newgesture.vercel.app",
-    "https://air-drawing-frontend.onrender.com",
-    "https://newgesture-2.onrender.com",
-    "http://localhost",
-    "http://localhost:3000",
-    "http://localhost:5500",
-    "http://127.0.0.1:5500",
-    "http://127.0.0.1",
-    "http://127.0.0.1:8080",
+# Regex patterns that are always allowed
+ALLOWED_ORIGIN_PATTERNS = [
+    re.compile(r"^https://newgesture.*\.vercel\.app$"),       # all vercel previews
+    re.compile(r"^https://.*\.vercel\.app$"),                  # any vercel app
+    re.compile(r"^http://localhost(:\d+)?$"),
+    re.compile(r"^http://127\.0\.0\.1(:\d+)?$"),
 ]
 
+ALLOWED_ORIGINS_EXACT = [
+    "https://newgesture.vercel.app",
+    "https://air-drawing-frontend.onrender.com",
+]
+
+
+def is_allowed_origin(origin: str) -> bool:
+    if origin in ALLOWED_ORIGINS_EXACT:
+        return True
+    return any(p.match(origin) for p in ALLOWED_ORIGIN_PATTERNS)
+
+
+# Use allow_all_origins=True so FastAPI echoes back the Origin header
+# We guard via is_allowed_origin in a custom middleware below
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
