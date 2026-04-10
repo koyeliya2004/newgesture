@@ -166,6 +166,7 @@
       transition:transform .15s,box-shadow .15s;
     }
     .start-btn:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(139,92,246,.6)}
+    .start-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
     .gesture-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;padding:0 20px;max-width:460px;width:100%}
     .g-card{
       background:var(--surface);border:1px solid var(--border);border-radius:12px;
@@ -190,9 +191,10 @@
       position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(16px);
       background:var(--surface2);border:1px solid var(--border);border-radius:999px;
       padding:7px 18px;font-size:.78rem;color:var(--text);z-index:60;
-      opacity:0;transition:all .3s;pointer-events:none;
+      opacity:0;transition:all .3s;pointer-events:none;max-width:90vw;text-align:center;
     }
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.error{border-color:var(--erase);color:var(--erase)}
 
     @media(max-width:700px){.legend{display:none}.modes{right:10px;top:66px}.stats-hud{display:none}}
   </style>
@@ -327,7 +329,7 @@
 <script>
 const API_BASE = 'https://air-drawing-api.onrender.com';
 
-// ── Backend wake-up ping (Render free tier spins down after 15min) ──────────
+// ── Backend wake-up ping ──────────────────────────────────────────────────────
 const badge = document.getElementById('backendBadge');
 let backendOnline = false;
 
@@ -670,32 +672,76 @@ function onResults(results){
   updateStats();
 }
 
-// ── Start camera
-async function startCamera(){
-  document.getElementById('startBtn').textContent='Loading…';
-  const hands=new Hands({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`});
-  hands.setOptions({maxNumHands:2,modelComplexity:1,minDetectionConfidence:0.7,minTrackingConfidence:0.6});
-  hands.onResults(onResults);
-  const stream=await navigator.mediaDevices.getUserMedia({video:{width:1280,height:720}});
-  video.srcObject=stream;
-  await video.play();
-  video.classList.add('on');
-  document.getElementById('camStatus').textContent='🟢 Camera active';
-  const camera=new Camera(video,{onFrame:async()=>await hands.send({image:video}),width:1280,height:720});
-  await camera.start();
-  document.getElementById('overlay').classList.add('hidden');
-  showToast('Camera started — show your hands! ✋');
+// ── Toast
+function showToast(msg, ms=2600, isError=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>{ t.className='toast'; }, ms);
 }
 
-// ── Toast
-function showToast(msg,ms=2600){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),ms);
+// ── Start camera (with full error handling)
+async function startCamera(){
+  const btn = document.getElementById('startBtn');
+
+  // Must be HTTPS or localhost for camera access
+  if(location.protocol !== 'https:' && location.hostname !== 'localhost'){
+    showToast('❌ Camera needs HTTPS. Use the Vercel link!', 5000, true);
+    return;
+  }
+
+  // Check if MediaPipe loaded
+  if(typeof Hands === 'undefined'){
+    showToast('⏳ MediaPipe still loading, please wait a moment…', 4000, true);
+    return;
+  }
+
+  btn.textContent = 'Loading…';
+  btn.disabled = true;
+
+  try {
+    // Request camera
+    const stream = await navigator.mediaDevices.getUserMedia({video:{width:1280,height:720}});
+    video.srcObject = stream;
+    await video.play();
+    video.classList.add('on');
+    document.getElementById('camStatus').textContent = '🟢 Camera active';
+
+    // Init MediaPipe Hands
+    const hands = new Hands({locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`});
+    hands.setOptions({maxNumHands:2, modelComplexity:1, minDetectionConfidence:0.7, minTrackingConfidence:0.6});
+    hands.onResults(onResults);
+
+    const camera = new Camera(video, {
+      onFrame: async () => await hands.send({image: video}),
+      width: 1280,
+      height: 720
+    });
+    await camera.start();
+
+    document.getElementById('overlay').classList.add('hidden');
+    showToast('Camera started — show your hands! ✋');
+
+  } catch(err) {
+    btn.textContent = '🎥 Start Camera';
+    btn.disabled = false;
+
+    if(err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'){
+      showToast('❌ Camera permission denied! Allow camera in browser settings.', 5000, true);
+    } else if(err.name === 'NotFoundError'){
+      showToast('❌ No camera found on this device.', 5000, true);
+    } else if(err.name === 'NotReadableError'){
+      showToast('❌ Camera is in use by another app. Close it and retry.', 5000, true);
+    } else {
+      showToast('❌ Error: ' + err.message, 5000, true);
+      console.error('Camera/MediaPipe error:', err);
+    }
+  }
 }
 
 // ── Controls: Start
-document.getElementById('startBtn').addEventListener('click',startCamera);
+document.getElementById('startBtn').addEventListener('click', startCamera);
 
 // ── Color swatches
 document.getElementById('colorRow').addEventListener('click',e=>{
