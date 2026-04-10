@@ -13,17 +13,17 @@ AirDraw Studio transforms your hand into the most natural drawing tool ever made
 
 - **Draw freely** — point your index finger and paint across the canvas in real time
 - **Erase instantly** — open your palm to wipe strokes clean
-- **Move artwork** — pinch any stroke and drag it anywhere
-- **Switch colors** — flash a peace sign to cycle through a full color palette
+- **Move artwork** — pinch any stroke and drag it anywhere on the canvas
+- **Switch colors** — flash a peace sign to cycle through the full color palette
 - **Undo anytime** — a quick "call me" gesture rolls back your last stroke
 - **Pause drawing** — close your fist to enter idle mode without losing your work
-- **Save & revisit** — save your sessions to the cloud and download as PNG from your History gallery
+- **Save & revisit** — store sessions to the cloud and export as PNG from your History gallery
 
 ---
 
 ## ✋ Gesture Reference
 
-| Gesture | What Happens |
+| Gesture | Action |
 |---|---|
 | ☝️ Index finger only | Draw on canvas |
 | 🤚 Open palm | Erase nearby strokes |
@@ -39,11 +39,11 @@ AirDraw Studio transforms your hand into the most natural drawing tool ever made
 **All you need is a browser and a camera.**
 
 1. Open the [Live Studio](https://newgesture.vercel.app/app.html) in Chrome or Edge
-2. Click **Allow** when the browser requests camera access
-3. Hold your hand up in front of the camera — the skeleton tracker activates instantly
-4. Start drawing!
+2. Click **Allow** when prompted for camera access
+3. Hold your hand up in front of the camera — the tracker activates instantly
+4. Start drawing
 
-> 💡 **Best results:** good lighting, hand 30–60 cm from camera, plain background.
+> 💡 **Best results:** good lighting, hand 30–60 cm from the camera, plain background preferred.
 
 ---
 
@@ -54,7 +54,7 @@ AirDraw Studio transforms your hand into the most natural drawing tool ever made
 | Brush style | Round · Square · Spray · Calligraphy |
 | Canvas theme | Dark · Light · Grid · Chalkboard |
 | Brush size | Adjustable in real time |
-| Colors | 7 preset colors + custom cycling |
+| Colors | 7 preset colors + gesture cycling |
 
 ---
 
@@ -62,22 +62,22 @@ AirDraw Studio transforms your hand into the most natural drawing tool ever made
 
 - **Download PNG** — export your current canvas as a full-resolution image
 - **Save to Cloud** — store your session for later; access everything in the **History** gallery
-- **Revisit anytime** — your saved sessions are listed with thumbnails and timestamps
+- **Revisit anytime** — saved sessions appear with thumbnails and timestamps
 
 ---
 
 ## 🌐 Deployment
 
 ### Frontend
-Hosted on **Vercel** — automatic deploys on every push to `main`.
+Hosted on **Vercel** — deploys automatically on every push to `main`.
 
 ### Backend
-Hosted on **Render** — always-on API for session storage.
+Hosted on **Render** — always-on API handling session storage.
 
-#### Deploy your own backend on Render
+#### Self-host the backend on Render
 1. Go to [render.com](https://render.com) → **New → Web Service**
-2. Connect `koyeliya2004/newgesture`
-3. Set:
+2. Connect the `koyeliya2004/newgesture` repository
+3. Set the following:
    - **Root Directory**: `backend`
    - **Build Command**: `pip install -r requirements.txt`
    - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
@@ -87,12 +87,12 @@ Hosted on **Render** — always-on API for session storage.
 
 ## 🤝 Collaboration
 
-Want to contribute, build on top of AirDraw, or integrate it into your own project?
+Want to contribute, extend AirDraw, or integrate it into your own project?
 
-- **Fork the repo** and open a pull request — all contributions welcome
+- **Fork the repo** and open a pull request — all contributions are welcome
 - **Feature ideas?** Open an issue with the `enhancement` label
 - **Found a bug?** Report it via GitHub Issues
-- **Want to collaborate on a bigger build?** Reach out directly via GitHub
+- **Want to build something bigger together?** Reach out directly via GitHub — always open to interesting ideas
 
 This project is fully open source under the MIT license.
 
